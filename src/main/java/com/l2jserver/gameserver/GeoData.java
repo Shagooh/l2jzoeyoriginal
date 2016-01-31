@@ -196,8 +196,9 @@ public class GeoData {
 			return z;
 		}
 		
-		int nextLowerZ = getNextLowerZ(geoX, geoY, z + 20);
-		return Math.abs(nextLowerZ - z) <= SPAWN_Z_DELTA_LIMIT ? nextLowerZ : z;
+		int nearestZ = getNearestZ(geoX, geoY, z);
+		// TODO: possibly get rid of math abs
+		return (nearestZ > z) && (Math.abs(nearestZ - z) > SPAWN_Z_DELTA_LIMIT) ? z : nearestZ;
 	}
 	
 	/**
