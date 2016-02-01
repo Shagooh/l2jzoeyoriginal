@@ -182,7 +182,8 @@ public class GeoData {
 	}
 	
 	/**
-	 * Gets the spawn height.
+	 * Gets the spawn height. This method is used to coorect Z for spawning and<br>
+	 * movement.
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 * @param z the the z coordinate
@@ -196,9 +197,14 @@ public class GeoData {
 			return z;
 		}
 		
+		// this Z correction can not increase Z by more than SPAWN_Z_DELTA_LIMIT units and can decrease Z an unlimited amount
 		int nearestZ = getNearestZ(geoX, geoY, z);
-		// TODO: possibly get rid of math abs
-		return (nearestZ > z) && (Math.abs(nearestZ - z) > SPAWN_Z_DELTA_LIMIT) ? z : nearestZ;
+		if ((nearestZ > z) && ((nearestZ - z) > SPAWN_Z_DELTA_LIMIT))
+		{
+			// here the nearest Z was more than SPAWN_Z_DELTA_LIMIT above Z, so we use the next lower z instead
+			return getNextLowerZ(geoX, geoY, z);
+		}
+		return nearestZ;
 	}
 	
 	/**

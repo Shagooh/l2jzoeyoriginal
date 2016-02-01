@@ -104,6 +104,11 @@ public class ValidatePosition extends L2GameClientPacket {
 		
 		if (GeoData.getInstance().hasGeo(realX, realY) && (_z < realZ) && (Math.abs(realZ - _z) > 100))
 		{
+			// This code is here to set players, which has fallen below the texture client side, back to the surface.
+			
+			// TODO: When running down hills where you can't stand this code will make the player jump around!
+			// If its reliably possible add an algorithm to movement code to make a character fall down server side based on geo data.
+			// If not, packets which report the client side position must be analyzed and synch between client and server position must be improoved.
 			activeChar.sendPacket(new ValidateLocation(activeChar));
 			return;
 		}
