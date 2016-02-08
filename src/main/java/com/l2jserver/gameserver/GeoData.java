@@ -35,7 +35,7 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
 import com.l2jserver.gameserver.util.GeoUtils;
 import com.l2jserver.gameserver.util.LinePointIterator;
-import com.l2jserver.gameserver.util.LinePointIterator3D;
+import com.l2jserver.gameserver.util.Util;
 import com.l2jserver.geodriver.Cell;
 import com.l2jserver.geodriver.GeoDriver;
 
@@ -50,7 +50,8 @@ public class GeoData {
 	
 	private static final String FILE_NAME_FORMAT = "%d_%d.l2j";
 	
-	private static final int ELEVATED_SEE_OVER_DISTANCE = 2;
+	// private static final int ELEVATED_SEE_OVER_DISTANCE = 2;
+	private static final double ELEVATED_SEE_OVER_DISTANCE_SQ = 3 * 3;
 	
 	private static final int MAX_SEE_OVER_HEIGHT = 48;
 	
@@ -336,40 +337,45 @@ public class GeoData {
 			geoY = tmp;
 		}
 		
-		LinePointIterator3D pointIter = new LinePointIterator3D(geoX, geoY, z, tGeoX, tGeoY, tz);
+		final int dz = z - tz;
+		
+		final double fullDistanceSq = Util.calculateDistance(geoX, geoY, 0, tGeoX, tGeoY, 0, false, true);
+		final double secondSeeOverDistancePoint = fullDistanceSq - ELEVATED_SEE_OVER_DISTANCE_SQ;
+		
+		// LinePointIterator3D pointIter = new LinePointIterator3D(geoX, geoY, z, tGeoX, tGeoY, tz);
+		LinePointIterator pointIter = new LinePointIterator(geoX, geoY, tGeoX, tGeoY);
 		// first point is guaranteed to be available, skip it, we can always see our own position
 		pointIter.next();
 		int prevX = pointIter.x();
 		int prevY = pointIter.y();
-		int prevBeeZ = pointIter.z();
+		// int prevBeeZ = pointIter.z();
+		int prevBeeZ = z;
 		int prevGeoZ = prevBeeZ;
-		int pointIndex = 0;
+		// int pointIndex = 0;
 		while (pointIter.next()) {
 			int curX = pointIter.x();
 			int curY = pointIter.y();
 			
-			if ((curX == prevX) && (curY == prevY)) {
-				continue;
-			}
+//			if ((curX == prevX) && (curY == prevY)) {
+//				continue;
+//			}
 			
-			int curBeeZ = pointIter.z();
+			double curDistanceSq = Util.calculateDistance(geoX, geoY, 0, curX, curY, 0, false, true);
+			int curBeeZ = z - (int) (dz * ((1.0 * curDistanceSq) / fullDistanceSq));
 			int curGeoZ = prevGeoZ;
 			
 			// check if the position has geodata
 			if (hasGeoPos(curX, curY)) {
 				int nswe = GeoUtils.computeNswe(prevX, prevY, curX, curY);
 				curGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, curX, curY, nswe);
-				int maxHeight;
-				if (pointIndex < ELEVATED_SEE_OVER_DISTANCE) {
-					maxHeight = z + MAX_SEE_OVER_HEIGHT;
-				}
-				// TODO: This is required to make the character on lower ground too be able to see over fences
-				//else if (pointIndex >= (nPoints - ELEVATED_SEE_OVER_DISTANCE))
-				//{
-				//maxHeight = tz + MAX_SEE_OVER_HEIGHT;
-				//}
-				else {
-					maxHeight = curBeeZ + MAX_SEE_OVER_HEIGHT;
+				int maxHeight = curBeeZ + MAX_SEE_OVER_HEIGHT;
+				// only allow shooting over fences when oponents are far enough away from each other
+				if (fullDistanceSq > ELEVATED_SEE_OVER_DISTANCE_SQ) {
+				    if (curDistanceSq <= ELEVATED_SEE_OVER_DISTANCE_SQ) {
+				        maxHeight = z + MAX_SEE_OVER_HEIGHT;
+				    } else if (curDistanceSq >= secondSeeOverDistancePoint) {
+				        maxHeight = tz + MAX_SEE_OVER_HEIGHT;
+				    }
 				}
 				
 				boolean canSeeThrough = false;
@@ -404,10 +410,11 @@ public class GeoData {
 			prevY = curY;
 			prevBeeZ = curBeeZ;
 			prevGeoZ = curGeoZ;
-			++pointIndex;
+			// ++pointIndex;
 		}
 		
-		return true;
+		// the traced end Z must be the same than the targets Z
+		return prevGeoZ == tz;
 	}
 	
 	/**
