@@ -116,28 +116,24 @@ public class GeoData {
 	}
 	
 	public boolean checkNearestNsweAntiCornerCut(int geoX, int geoY, int worldZ, int nswe) {
-		boolean can = true;
-		if ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST) {
-			// can = canEnterNeighbors(prevX, prevY - 1, prevGeoZ, Direction.EAST) && canEnterNeighbors(prevX + 1, prevY, prevGeoZ, Direction.NORTH);
+		boolean can = checkNearestNswe(geoX, geoY, worldZ, nswe);
+		if (can && (nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST) {
 			can = checkNearestNswe(geoX, geoY - 1, worldZ, Cell.NSWE_EAST) && checkNearestNswe(geoX + 1, geoY, worldZ, Cell.NSWE_NORTH);
 		}
 		
 		if (can && ((nswe & Cell.NSWE_NORTH_WEST) == Cell.NSWE_NORTH_WEST)) {
-			// can = canEnterNeighbors(prevX, prevY - 1, prevGeoZ, Direction.WEST) && canEnterNeighbors(prevX - 1, prevY, prevGeoZ, Direction.NORTH);
 			can = checkNearestNswe(geoX, geoY - 1, worldZ, Cell.NSWE_WEST) && checkNearestNswe(geoX, geoY - 1, worldZ, Cell.NSWE_NORTH);
 		}
 		
 		if (can && ((nswe & Cell.NSWE_SOUTH_EAST) == Cell.NSWE_SOUTH_EAST)) {
-			// can = canEnterNeighbors(prevX, prevY + 1, prevGeoZ, Direction.EAST) && canEnterNeighbors(prevX + 1, prevY, prevGeoZ, Direction.SOUTH);
 			can = checkNearestNswe(geoX, geoY + 1, worldZ, Cell.NSWE_EAST) && checkNearestNswe(geoX + 1, geoY, worldZ, Cell.NSWE_SOUTH);
 		}
 		
 		if (can && ((nswe & Cell.NSWE_SOUTH_WEST) == Cell.NSWE_SOUTH_WEST)) {
-			// can = canEnterNeighbors(prevX, prevY + 1, prevGeoZ, Direction.WEST) && canEnterNeighbors(prevX - 1, prevY, prevGeoZ, Direction.SOUTH);
 			can = checkNearestNswe(geoX, geoY + 1, worldZ, Cell.NSWE_WEST) && checkNearestNswe(geoX - 1, geoY, worldZ, Cell.NSWE_SOUTH);
 		}
 		
-		return can && checkNearestNswe(geoX, geoY, worldZ, nswe);
+		return can;
 	}
 	
 	public int getNearestZ(int geoX, int geoY, int worldZ) {
@@ -345,9 +341,9 @@ public class GeoData {
 		pointIter.next();
 		int prevX = pointIter.x();
 		int prevY = pointIter.y();
-		int prevZ = pointIter.z();
-		int prevGeoZ = prevZ;
-		int ptIndex = 0;
+		int prevBeeZ = pointIter.z();
+		int prevGeoZ = prevBeeZ;
+		int pointIndex = 0;
 		while (pointIter.next()) {
 			int curX = pointIter.x();
 			int curY = pointIter.y();
@@ -356,7 +352,7 @@ public class GeoData {
 				continue;
 			}
 			
-			int beeCurZ = pointIter.z();
+			int curBeeZ = pointIter.z();
 			int curGeoZ = prevGeoZ;
 			
 			// check if the position has geodata
@@ -364,10 +360,15 @@ public class GeoData {
 				int nswe = GeoUtils.computeNswe(prevX, prevY, curX, curY);
 				curGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, curX, curY, nswe);
 				int maxHeight;
-				if (ptIndex < ELEVATED_SEE_OVER_DISTANCE) {
+				if (pointIndex < ELEVATED_SEE_OVER_DISTANCE) {
 					maxHeight = z + MAX_SEE_OVER_HEIGHT;
+				// TODO: This is required to make the character on lower ground too be able to see over fences
+				//else if (pointIndex >= (nPoints - ELEVATED_SEE_OVER_DISTANCE))
+				//{
+				//maxHeight = tz + MAX_SEE_OVER_HEIGHT;
+				//}
 				} else {
-					maxHeight = beeCurZ + MAX_SEE_OVER_HEIGHT;
+					maxHeight = curBeeZ + MAX_SEE_OVER_HEIGHT;
 				}
 				
 				boolean canSeeThrough = false;
@@ -375,19 +376,19 @@ public class GeoData {
 					if ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST) {
 						int northGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY - 1, Cell.NSWE_EAST);
 						int eastGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX + 1, prevY, Cell.NSWE_NORTH);
-						canSeeThrough = (northGeoZ <= maxHeight) && (eastGeoZ <= maxHeight) && (northGeoZ <= getNearestZ(prevX, prevY - 1, beeCurZ)) && (eastGeoZ <= getNearestZ(prevX + 1, prevY, beeCurZ));
+						canSeeThrough = (northGeoZ <= maxHeight) && (eastGeoZ <= maxHeight) && (northGeoZ <= getNearestZ(prevX, prevY - 1, curBeeZ)) && (eastGeoZ <= getNearestZ(prevX + 1, prevY, curBeeZ));
 					} else if ((nswe & Cell.NSWE_NORTH_WEST) == Cell.NSWE_NORTH_WEST) {
 						int northGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY - 1, Cell.NSWE_WEST);
 						int westGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX - 1, prevY, Cell.NSWE_NORTH);
-						canSeeThrough = (northGeoZ <= maxHeight) && (westGeoZ <= maxHeight) && (northGeoZ <= getNearestZ(prevX, prevY - 1, beeCurZ)) && (westGeoZ <= getNearestZ(prevX - 1, prevY, beeCurZ));
+						canSeeThrough = (northGeoZ <= maxHeight) && (westGeoZ <= maxHeight) && (northGeoZ <= getNearestZ(prevX, prevY - 1, curBeeZ)) && (westGeoZ <= getNearestZ(prevX - 1, prevY, curBeeZ));
 					} else if ((nswe & Cell.NSWE_SOUTH_EAST) == Cell.NSWE_SOUTH_EAST) {
 						int southGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY + 1, Cell.NSWE_EAST);
 						int eastGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX + 1, prevY, Cell.NSWE_SOUTH);
-						canSeeThrough = (southGeoZ <= maxHeight) && (eastGeoZ <= maxHeight) && (southGeoZ <= getNearestZ(prevX, prevY + 1, beeCurZ)) && (eastGeoZ <= getNearestZ(prevX + 1, prevY, beeCurZ));
+						canSeeThrough = (southGeoZ <= maxHeight) && (eastGeoZ <= maxHeight) && (southGeoZ <= getNearestZ(prevX, prevY + 1, curBeeZ)) && (eastGeoZ <= getNearestZ(prevX + 1, prevY, curBeeZ));
 					} else if ((nswe & Cell.NSWE_SOUTH_WEST) == Cell.NSWE_SOUTH_WEST) {
 						int southGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY + 1, Cell.NSWE_WEST);
 						int westGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX - 1, prevY, Cell.NSWE_SOUTH);
-						canSeeThrough = (southGeoZ <= maxHeight) && (westGeoZ <= maxHeight) && (southGeoZ <= getNearestZ(prevX, prevY + 1, beeCurZ)) && (westGeoZ <= getNearestZ(prevX - 1, prevY, beeCurZ));
+						canSeeThrough = (southGeoZ <= maxHeight) && (westGeoZ <= maxHeight) && (southGeoZ <= getNearestZ(prevX, prevY + 1, curBeeZ)) && (westGeoZ <= getNearestZ(prevX - 1, prevY, curBeeZ));
 					} else {
 						canSeeThrough = true;
 					}
@@ -400,8 +401,9 @@ public class GeoData {
 			
 			prevX = curX;
 			prevY = curY;
+			prevBeeZ = curBeeZ;
 			prevGeoZ = curGeoZ;
-			++ptIndex;
+			++pointIndex;
 		}
 		
 		return true;
