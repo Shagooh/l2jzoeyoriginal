@@ -117,7 +117,7 @@ public class GeoData {
 	
 	public boolean checkNearestNsweAntiCornerCut(int geoX, int geoY, int worldZ, int nswe) {
 		boolean can = checkNearestNswe(geoX, geoY, worldZ, nswe);
-		if (can && (nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST) {
+		if (can && ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST)) {
 			can = checkNearestNswe(geoX, geoY - 1, worldZ, Cell.NSWE_EAST) && checkNearestNswe(geoX + 1, geoY, worldZ, Cell.NSWE_NORTH);
 		}
 		
@@ -362,12 +362,13 @@ public class GeoData {
 				int maxHeight;
 				if (pointIndex < ELEVATED_SEE_OVER_DISTANCE) {
 					maxHeight = z + MAX_SEE_OVER_HEIGHT;
+				}
 				// TODO: This is required to make the character on lower ground too be able to see over fences
 				//else if (pointIndex >= (nPoints - ELEVATED_SEE_OVER_DISTANCE))
 				//{
 				//maxHeight = tz + MAX_SEE_OVER_HEIGHT;
 				//}
-				} else {
+				else {
 					maxHeight = curBeeZ + MAX_SEE_OVER_HEIGHT;
 				}
 				
