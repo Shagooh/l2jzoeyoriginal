@@ -144,6 +144,7 @@ public final class GeoUtils {
 				exsp.addLine(col, x - 3, y + 5, z, x + 3, y + 5, z);
 				exsp.addLine(col, x - 4, y + 4, z, x + 4, y + 4, z);
 				
+				// west arrow
 				col = getDirectionColor(gx, gy, z, Cell.NSWE_WEST);
 				exsp.addLine(col, x - 7, y - 1, z, x - 7, y + 1, z);
 				exsp.addLine(col, x - 6, y - 2, z, x - 6, y + 2, z);
