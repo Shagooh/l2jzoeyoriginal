@@ -36,10 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.communitybbs.BB.Forum;
 import com.l2jserver.gameserver.communitybbs.Manager.ForumsBBSManager;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.dao.ClanDAO;
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.data.sql.impl.CrestTable;
@@ -113,6 +115,9 @@ public class L2Clan implements IIdentifiable, INamable {
 	public static final int SUBUNIT_KNIGHT3 = 2001;
 	/** Clan subunit type of Order of Knights B-2 */
 	public static final int SUBUNIT_KNIGHT4 = 2002;
+	
+	@Autowired
+	private ClanDAO clanDAO;
 	
 	private String _name;
 	private int _clanId;
@@ -1604,7 +1609,7 @@ public class L2Clan implements IIdentifiable, INamable {
 	}
 	
 	private void restoreRankPrivs() {
-		DAOFactory.getInstance().getClanDAO().getPrivileges(getId()).forEach((rank, privileges) -> _privs.get(rank).setPrivs(privileges));
+		clanDAO.getPrivileges(getId()).forEach((rank, privileges) -> _privs.get(rank).setPrivs(privileges));
 	}
 	
 	public void initializePrivs() {
@@ -1625,7 +1630,7 @@ public class L2Clan implements IIdentifiable, INamable {
 		if (rankPrivileges != null) {
 			rankPrivileges.setPrivs(privs);
 			
-			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
+			clanDAO.storePrivileges(getId(), rank, privs);
 			
 			for (var cm : getMembers()) {
 				if (cm.isOnline() && (cm.getPlayerInstance() != null) && (cm.getPowerGrade() == rank)) {
@@ -1638,7 +1643,7 @@ public class L2Clan implements IIdentifiable, INamable {
 		} else {
 			_privs.put(rank, new RankPrivs(rank, 0, privs));
 			
-			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
+			clanDAO.storePrivileges(getId(), rank, privs);
 		}
 	}
 	

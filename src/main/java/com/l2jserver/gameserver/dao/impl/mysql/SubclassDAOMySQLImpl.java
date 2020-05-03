@@ -20,6 +20,7 @@ package com.l2jserver.gameserver.dao.impl.mysql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.SubclassDAO;
@@ -30,6 +31,7 @@ import com.l2jserver.gameserver.model.base.SubClass;
  * Subclass DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class SubclassDAOMySQLImpl implements SubclassDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubclassDAOMySQLImpl.class);

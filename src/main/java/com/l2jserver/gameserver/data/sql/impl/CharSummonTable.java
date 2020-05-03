@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.data.xml.impl.NpcData;
@@ -38,6 +39,7 @@ import com.l2jserver.gameserver.model.actor.templates.L2NpcTemplate;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.serverpackets.PetItemList;
+import com.l2jserver.gameserver.service.PetService;
 
 /**
  * @author Nyaran
@@ -60,6 +62,9 @@ public class CharSummonTable {
 	private static final String REMOVE_SUMMON = "DELETE FROM character_summons WHERE ownerId = ?";
 	
 	private static final String SAVE_SUMMON = "REPLACE INTO character_summons (ownerId,summonSkillId,curHp,curMp,time) VALUES (?,?,?,?,?)";
+	
+	@Autowired
+	private PetService petService;
 	
 	public Map<Integer, Integer> getPets() {
 		return _pets;
@@ -123,7 +128,7 @@ public class CharSummonTable {
 			return;
 		}
 		
-		final L2PetInstance pet = L2PetInstance.spawnPet(npcTemplate, activeChar, item);
+		final L2PetInstance pet = petService.spawn(npcTemplate, activeChar, item);
 		if (pet == null) {
 			LOG.warn("Null pet instance for player {} and pet NPC template {}!", activeChar, npcTemplate);
 			return;

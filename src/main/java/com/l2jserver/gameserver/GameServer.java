@@ -39,6 +39,9 @@ import java.util.logging.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import com.l2jserver.commons.UPnPService;
 import com.l2jserver.commons.dao.ServerNameDAO;
@@ -46,7 +49,6 @@ import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.commons.util.IPv4Filter;
 import com.l2jserver.commons.util.Util;
 import com.l2jserver.gameserver.cache.HtmCache;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
 import com.l2jserver.gameserver.data.json.ExperienceData;
 import com.l2jserver.gameserver.data.sql.impl.AnnouncementsTable;
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
@@ -153,7 +155,14 @@ import com.l2jserver.gameserver.util.DeadLockDetector;
 import com.l2jserver.mmocore.SelectorConfig;
 import com.l2jserver.mmocore.SelectorThread;
 
-public final class GameServer {
+/**
+ * Game Server.
+ * @author Zoey76
+ * @version 1.0.0
+ */
+@Configuration
+@ComponentScan("com.l2jserver")
+public class GameServer {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(GameServer.class);
 	
@@ -173,7 +182,7 @@ public final class GameServer {
 	
 	public static final Calendar dateTimeServerStarted = Calendar.getInstance();
 	
-	public GameServer() throws Exception {
+	public GameServer(L2GamePacketHandler gamePacketHandler) throws Exception {
 		// TODO(Zoey76): Remove when loggers rework is completed.
 		LogManager.getLogManager().reset();
 		SLF4JBridgeHandler.install();
@@ -189,8 +198,6 @@ public final class GameServer {
 			.withMaxIdleTime(database().getMaxIdleTime()) //
 			.withMaxPoolSize(database().getMaxConnections()) //
 			.build();
-		
-		DAOFactory.getInstance();
 		
 		if (!IdFactory.getInstance().isInitialized()) {
 			LOG.error("Could not read object IDs from database. Please check your configuration.");
@@ -394,7 +401,7 @@ public final class GameServer {
 		sc.HELPER_BUFFER_COUNT = mmo().getHelperBufferCount();
 		sc.TCP_NODELAY = mmo().isTcpNoDelay();
 		
-		_gamePacketHandler = new L2GamePacketHandler();
+		_gamePacketHandler = gamePacketHandler;
 		_selectorThread = new SelectorThread<>(sc, _gamePacketHandler, _gamePacketHandler, _gamePacketHandler, new IPv4Filter());
 		
 		InetAddress bindAddress = null;
@@ -446,7 +453,8 @@ public final class GameServer {
 			geodata().setProperty("GeoDataPath", geodata);
 		}
 		
-		gameServer = new GameServer();
+		final var context = new AnnotationConfigApplicationContext(GameServer.class);
+		gameServer = context.getBean(GameServer.class);
 	}
 	
 	public long getUsedMemoryMB() {

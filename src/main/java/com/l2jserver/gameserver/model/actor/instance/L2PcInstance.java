@@ -33,6 +33,7 @@ import static com.l2jserver.gameserver.network.SystemMessageId.S1_DISARMED;
 import static com.l2jserver.gameserver.network.SystemMessageId.S1_EQUIPPED;
 import static com.l2jserver.gameserver.network.SystemMessageId.S1_S2_EQUIPPED;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +60,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.GameTimeController;
@@ -76,7 +80,18 @@ import com.l2jserver.gameserver.ai.L2SummonAI;
 import com.l2jserver.gameserver.cache.WarehouseCacheManager;
 import com.l2jserver.gameserver.communitybbs.BB.Forum;
 import com.l2jserver.gameserver.communitybbs.Manager.ForumsBBSManager;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.dao.HennaDAO;
+import com.l2jserver.gameserver.dao.ItemReuseDAO;
+import com.l2jserver.gameserver.dao.PetDAO;
+import com.l2jserver.gameserver.dao.PlayerDAO;
+import com.l2jserver.gameserver.dao.PlayerSkillSaveDAO;
+import com.l2jserver.gameserver.dao.RecipeBookDAO;
+import com.l2jserver.gameserver.dao.RecipeShopListDAO;
+import com.l2jserver.gameserver.dao.RecommendationBonusDAO;
+import com.l2jserver.gameserver.dao.ShortcutDAO;
+import com.l2jserver.gameserver.dao.SkillDAO;
+import com.l2jserver.gameserver.dao.SubclassDAO;
+import com.l2jserver.gameserver.dao.TeleportBookmarkDAO;
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
 import com.l2jserver.gameserver.data.sql.impl.CharSummonTable;
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
@@ -341,14 +356,54 @@ import com.l2jserver.gameserver.util.Util;
  * This class represents all player characters in the world.<br>
  * There is always a client-thread connected to this (except if a player-store is activated upon logout).
  */
+@Component
+@Scope(SCOPE_PROTOTYPE)
 public final class L2PcInstance extends L2Playable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(L2PcInstance.class);
 	
 	public static final int ID_NONE = -1;
 	public static final int REQUEST_TIMEOUT = 15;
-	private static final Logger LOG = LoggerFactory.getLogger(L2PcInstance.class);
 	private static final String COND_OVERRIDE_KEY = "cond_override";
 	// during fall validations will be disabled for 10 ms.
 	private static final int FALLING_VALIDATION_DELAY = 10000;
+	
+	@Autowired
+	private PlayerDAO playerDAO;
+
+	@Autowired
+	private SkillDAO skillDAO;
+
+	@Autowired
+	private PlayerSkillSaveDAO playerSkillSaveDAO;
+
+	@Autowired
+	private ShortcutDAO shortcutDAO;
+
+	@Autowired
+	private RecipeBookDAO recipeBookDAO;
+
+	@Autowired
+	private PetDAO petDAO;
+
+	@Autowired
+	private HennaDAO hennaDAO;
+
+	@Autowired
+	private RecipeShopListDAO recipeShopListDAO;
+
+	@Autowired
+	private SubclassDAO subclassDAO;
+
+	@Autowired
+	private ItemReuseDAO itemReuseDAO;
+
+	@Autowired
+	private TeleportBookmarkDAO teleportBookmarkDAO;
+
+	@Autowired
+	private RecommendationBonusDAO recommendationBonusDAO;
+	
 	public final ReentrantLock soulShotLock = new ReentrantLock();
 	private final Queue<IEventListener> _eventListeners = new ConcurrentLinkedQueue<>();
 	private final String _accountName;
@@ -660,13 +715,6 @@ public final class L2PcInstance extends L2Playable {
 	private ScheduledFuture<?> _taskWarnUserTakeBreak;
 	private L2Fish _fish;
 	
-	/**
-	 * Creates a player.
-	 * @param objectId the object ID
-	 * @param classId the player's class ID
-	 * @param accountName the account name
-	 * @param app the player appearance
-	 */
 	public L2PcInstance(int objectId, int classId, String accountName, PcAppearance app) {
 		super(objectId, PlayerTemplateData.getInstance().getTemplate(classId));
 		setInstanceType(InstanceType.L2PcInstance);
@@ -692,133 +740,8 @@ public final class L2PcInstance extends L2Playable {
 		Formulas.addFuncsToNewPlayer(this);
 	}
 	
-	/**
-	 * Creates a player.
-	 * @param classId the player class ID
-	 * @param accountName the account name
-	 * @param app the player appearance
-	 */
-	private L2PcInstance(int classId, String accountName, PcAppearance app) {
+	public L2PcInstance(int classId, String accountName, PcAppearance app) {
 		this(IdFactory.getInstance().getNextId(), classId, accountName, app);
-	}
-	
-	/**
-	 * Create a new L2PcInstance and add it in the characters table of the database.<br>
-	 * <B><U> Actions</U> :</B>
-	 * <ul>
-	 * <li>Create a new L2PcInstance with an account name</li>
-	 * <li>Set the name, the Hair Style, the Hair Color and the Face type of the L2PcInstance</li>
-	 * <li>Add the player in the characters table of the database</li>
-	 * </ul>
-	 * @param classId the player class ID
-	 * @param accountName The name of the L2PcInstance
-	 * @param name The name of the L2PcInstance
-	 * @param app the player's appearance
-	 * @return The L2PcInstance added to the database or null
-	 */
-	public static L2PcInstance create(int classId, String accountName, String name, PcAppearance app) {
-		// Create a new L2PcInstance with an account name
-		L2PcInstance player = new L2PcInstance(classId, accountName, app);
-		// Set the name of the L2PcInstance
-		player.setName(name);
-		// Set Character's create time
-		player.setCreateDate(Calendar.getInstance());
-		// Set the base class ID to that of the actual class ID.
-		player.setBaseClass(player.getClassId());
-		// Kept for backwards compatibility.
-		player.setNewbie(1);
-		// Give 20 recommendations
-		player.setRecomLeft(20);
-		// Add the player in the characters table of the database
-		return DAOFactory.getInstance().getPlayerDAO().insert(player) ? player : null;
-	}
-	
-	/**
-	 * Restores a player from the database.
-	 * @param objectId the player's object ID
-	 * @return the player
-	 */
-	public static L2PcInstance load(int objectId) {
-		try {
-			final L2PcInstance player = DAOFactory.getInstance().getPlayerDAO().load(objectId);
-			if (player == null) {
-				return null;
-			}
-			
-			DAOFactory.getInstance().getPlayerDAO().loadCharacters(player);
-			
-			// Retrieve from the database all items of this L2PcInstance and add them to _inventory
-			player.getInventory().restore();
-			player.getFreight().restore();
-			if (!general().warehouseCache()) {
-				player.getWarehouse();
-			}
-			
-			// Retrieve from the database all secondary data of this L2PcInstance
-			// Note that Clan, Noblesse and Hero skills are given separately and not here.
-			// Retrieve from the database all skills of this L2PcInstance and add them to _skills
-			DAOFactory.getInstance().getSkillDAO().load(player);
-			
-			player._macros.restoreMe();
-			
-			player._shortCuts.restoreMe();
-			
-			DAOFactory.getInstance().getHennaDAO().load(player);
-			
-			DAOFactory.getInstance().getTeleportBookmarkDAO().load(player);
-			
-			DAOFactory.getInstance().getRecipeBookDAO().load(player, true);
-			
-			if (character().storeRecipeShopList()) {
-				DAOFactory.getInstance().getRecipeShopListDAO().load(player);
-			}
-			
-			DAOFactory.getInstance().getPremiumItemDAO().load(player);
-			
-			DAOFactory.getInstance().getItemDAO().loadPetInventory(player);
-			
-			// Reward auto-get skills and all available skills if auto-learn skills is true.
-			player.rewardSkills();
-			
-			DAOFactory.getInstance().getItemReuseDAO().load(player);
-			
-			// Buff and status icons
-			if (character().storeSkillCooltime()) {
-				player.restoreEffects();
-			}
-			
-			// Restore current CP, HP and MP values
-			if (player.getCurrentHp() < 0.5) {
-				player.setIsDead(true);
-				player.stopHpMpRegeneration();
-			}
-			
-			// Restore pet if exists in the world
-			player.setPet(L2World.getInstance().getPet(player.getObjectId()));
-			if (player.hasSummon()) {
-				player.getSummon().setOwner(player);
-			}
-			
-			// Update the overloaded status of the L2PcInstance
-			player.refreshOverloaded();
-			// Update the expertise status of the L2PcInstance
-			player.refreshExpertisePenalty();
-			
-			DAOFactory.getInstance().getFriendDAO().load(player);
-			
-			if (character().storeUISettings()) {
-				player.restoreUISettings();
-			}
-			
-			if (player.isGM()) {
-				final long masks = player.getVariables().getLong(COND_OVERRIDE_KEY, PcCondOverride.getAllExceptionsMask());
-				player.setOverrideCond(masks);
-			}
-			return player;
-		} catch (Exception e) {
-			LOG.error("Failed loading character.", e);
-		}
-		return null;
 	}
 	
 	public boolean isSpawnProtected() {
@@ -1146,7 +1069,7 @@ public final class L2PcInstance extends L2Playable {
 		_commonRecipeBook.put(recipe.getId(), recipe);
 		
 		if (saveToDb) {
-			DAOFactory.getInstance().getRecipeBookDAO().insert(this, recipe.getId(), false);
+			recipeBookDAO.insert(this, recipe.getId(), false);
 		}
 	}
 	
@@ -1159,7 +1082,7 @@ public final class L2PcInstance extends L2Playable {
 		_dwarvenRecipeBook.put(recipe.getId(), recipe);
 		
 		if (saveToDb) {
-			DAOFactory.getInstance().getRecipeBookDAO().insert(this, recipe.getId(), true);
+			recipeBookDAO.insert(this, recipe.getId(), true);
 		}
 	}
 	
@@ -1177,9 +1100,9 @@ public final class L2PcInstance extends L2Playable {
 	 */
 	public void unregisterRecipeList(int recipeId) {
 		if (_dwarvenRecipeBook.remove(recipeId) != null) {
-			DAOFactory.getInstance().getRecipeBookDAO().delete(this, recipeId, true);
+			recipeBookDAO.delete(this, recipeId, true);
 		} else if (_commonRecipeBook.remove(recipeId) != null) {
-			DAOFactory.getInstance().getRecipeBookDAO().delete(this, recipeId, false);
+			recipeBookDAO.delete(this, recipeId, false);
 		} else {
 			LOG.warn("Attempted to remove unknown RecipeList: {}", recipeId);
 		}
@@ -1328,9 +1251,10 @@ public final class L2PcInstance extends L2Playable {
 		return (_notifyQuestOfDeathList == null) || _notifyQuestOfDeathList.isEmpty();
 	}
 	
-	/**
-	 * @return a table containing all L2ShortCut of the L2PcInstance.
-	 */
+	public ShortCuts getShortCuts() {
+		return _shortCuts;
+	}
+	
 	public Shortcut[] getAllShortCuts() {
 		return _shortCuts.getAllShortCuts();
 	}
@@ -2312,7 +2236,7 @@ public final class L2PcInstance extends L2Playable {
 			skillsForStore.add(sk);
 		}
 		
-		DAOFactory.getInstance().getSkillDAO().insert(this, -1, skillsForStore);
+		skillDAO.insert(this, -1, skillsForStore);
 		
 		if (character().autoLearnSkills() && (skillCounter > 0)) {
 			sendMessage("You have learned " + skillCounter + " new skills.");
@@ -4920,7 +4844,7 @@ public final class L2PcInstance extends L2Playable {
 		stopWarnUserTakeBreak();
 		stopWaterTask();
 		stopFeed();
-		DAOFactory.getInstance().getPetDAO().updateFood(this, _mountNpcId);
+		petDAO.updateFood(this, _mountNpcId);
 		stopRentPet();
 		stopPvpRegTask();
 		stopSoulTask();
@@ -5602,7 +5526,7 @@ public final class L2PcInstance extends L2Playable {
 		}
 		broadcastPacket(new Ride(this));
 		setMountObjectID(0);
-		DAOFactory.getInstance().getPetDAO().updateFood(this, petId);
+		petDAO.updateFood(this, petId);
 		// Notify self and others about speed change
 		broadcastUserInfo();
 		return true;
@@ -5785,7 +5709,7 @@ public final class L2PcInstance extends L2Playable {
 		
 		// Update the characters table of the database with online status and lastAccess (called when login and logout)
 		if (updateInDb) {
-			DAOFactory.getInstance().getPlayerDAO().updateOnlineStatus(this);
+			playerDAO.updateOnlineStatus(this);
 		}
 	}
 	
@@ -5836,17 +5760,17 @@ public final class L2PcInstance extends L2Playable {
 	 * @param storeActiveEffects
 	 */
 	public synchronized void store(boolean storeActiveEffects) {
-		DAOFactory.getInstance().getPlayerDAO().storeCharBase(this);
+		playerDAO.storeCharBase(this);
 		
-		DAOFactory.getInstance().getSubclassDAO().update(this);
+		subclassDAO.update(this);
 		
 		storeEffect(storeActiveEffects);
 		
-		DAOFactory.getInstance().getItemReuseDAO().insert(this);
+		itemReuseDAO.insert(this);
 		
 		if (character().storeRecipeShopList()) {
-			DAOFactory.getInstance().getRecipeShopListDAO().delete(this);
-			DAOFactory.getInstance().getRecipeShopListDAO().insert(this);
+			recipeShopListDAO.delete(this);
+			recipeShopListDAO.insert(this);
 		}
 		
 		if (character().storeUISettings()) {
@@ -5877,9 +5801,9 @@ public final class L2PcInstance extends L2Playable {
 			return;
 		}
 		
-		DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this);
+		playerSkillSaveDAO.delete(this);
 		
-		DAOFactory.getInstance().getPlayerSkillSaveDAO().insert(this, storeEffects);
+		playerSkillSaveDAO.insert(this, storeEffects);
 	}
 	
 	/**
@@ -5960,7 +5884,7 @@ public final class L2PcInstance extends L2Playable {
 		// Remove a skill from the L2Character and its Func objects from calculator set of the L2Character
 		final Skill oldSkill = super.removeSkill(skill, true);
 		if (oldSkill != null) {
-			DAOFactory.getInstance().getSkillDAO().delete(this, oldSkill);
+			skillDAO.delete(this, oldSkill);
 		}
 		
 		if ((getTransformationId() > 0) || isCursedWeaponEquipped()) {
@@ -5987,9 +5911,9 @@ public final class L2PcInstance extends L2Playable {
 	private void storeSkill(Skill newSkill, Skill oldSkill, int newClassIndex) {
 		final int classIndex = (newClassIndex > -1) ? newClassIndex : _classIndex;
 		if ((oldSkill != null) && (newSkill != null)) {
-			DAOFactory.getInstance().getSkillDAO().update(this, classIndex, newSkill, oldSkill);
+			skillDAO.update(this, classIndex, newSkill, oldSkill);
 		} else if (newSkill != null) {
-			DAOFactory.getInstance().getSkillDAO().insert(this, classIndex, newSkill);
+			skillDAO.insert(this, classIndex, newSkill);
 		} else {
 			LOG.warn("Could not store new skill, it's null!");
 		}
@@ -6000,9 +5924,9 @@ public final class L2PcInstance extends L2Playable {
 	 */
 	@Override
 	public void restoreEffects() {
-		DAOFactory.getInstance().getPlayerSkillSaveDAO().load(this);
+		playerSkillSaveDAO.load(this);
 		
-		DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this);
+		playerSkillSaveDAO.delete(this);
 	}
 	
 	/**
@@ -6048,7 +5972,7 @@ public final class L2PcInstance extends L2Playable {
 		
 		_henna[slot] = null;
 		
-		DAOFactory.getInstance().getHennaDAO().delete(this, slot + 1);
+		hennaDAO.delete(this, slot + 1);
 		
 		// Calculate Henna modifiers of this L2PcInstance
 		recalcHennaStats();
@@ -6087,7 +6011,7 @@ public final class L2PcInstance extends L2Playable {
 				// Calculate Henna modifiers of this L2PcInstance
 				recalcHennaStats();
 				
-				DAOFactory.getInstance().getHennaDAO().insert(this, henna, i + 1);
+				hennaDAO.insert(this, henna, i + 1);
 				
 				// Send Server->Client HennaInfo packet to this L2PcInstance
 				sendPacket(new HennaInfo(this));
@@ -7639,7 +7563,7 @@ public final class L2PcInstance extends L2Playable {
 			newClass.setClassId(classId);
 			newClass.setClassIndex(classIndex);
 			
-			if (!DAOFactory.getInstance().getSubclassDAO().insert(this, newClass)) {
+			if (!subclassDAO.insert(this, newClass)) {
 				return false;
 			}
 			
@@ -7682,15 +7606,15 @@ public final class L2PcInstance extends L2Playable {
 		}
 		
 		try {
-			DAOFactory.getInstance().getHennaDAO().deleteAll(this, classIndex);
+			hennaDAO.deleteAll(this, classIndex);
 			
-			DAOFactory.getInstance().getSkillDAO().deleteAll(this, classIndex);
+			skillDAO.deleteAll(this, classIndex);
 			
-			DAOFactory.getInstance().getShortcutDAO().delete(this, classIndex);
+			shortcutDAO.delete(this, classIndex);
 			
-			DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this, classIndex);
+			playerSkillSaveDAO.delete(this, classIndex);
 			
-			DAOFactory.getInstance().getSubclassDAO().delete(this, classIndex);
+			subclassDAO.delete(this, classIndex);
 			
 			// Notify to scripts
 			int classId = getSubClasses().get(classIndex).getClassId();
@@ -7844,12 +7768,12 @@ public final class L2PcInstance extends L2Playable {
 			stopAllEffectsNotStayOnSubclassChange();
 			stopCubics();
 			
-			DAOFactory.getInstance().getRecipeBookDAO().load(this, false);
+			recipeBookDAO.load(this, false);
 			
 			// Restore any Death Penalty Buff
 			restoreDeathPenaltyBuffLevel();
 			
-			DAOFactory.getInstance().getSkillDAO().load(this);
+			skillDAO.load(this);
 			
 			rewardSkills();
 			regiveTemporarySkills();
@@ -7871,7 +7795,7 @@ public final class L2PcInstance extends L2Playable {
 				_henna[i] = null;
 			}
 			
-			DAOFactory.getInstance().getHennaDAO().load(this);
+			hennaDAO.load(this);
 			
 			// Calculate henna modifiers of this player.
 			recalcHennaStats();
@@ -9879,7 +9803,7 @@ public final class L2PcInstance extends L2Playable {
 			bookmark.setTag(tag);
 			bookmark.setName(name);
 			
-			DAOFactory.getInstance().getTeleportBookmarkDAO().update(this, id, icon, tag, name);
+			teleportBookmarkDAO.update(this, id, icon, tag, name);
 		}
 		
 		sendPacket(new ExGetBookMarkInfoPacket(this));
@@ -9889,7 +9813,7 @@ public final class L2PcInstance extends L2Playable {
 		if (_tpbookmarks.remove(id) != null) {
 			sendPacket(new ExGetBookMarkInfoPacket(this));
 			
-			DAOFactory.getInstance().getTeleportBookmarkDAO().delete(this, id);
+			teleportBookmarkDAO.delete(this, id);
 		}
 	}
 	
@@ -9991,7 +9915,7 @@ public final class L2PcInstance extends L2Playable {
 		
 		sendPacket(new ExGetBookMarkInfoPacket(this));
 		
-		DAOFactory.getInstance().getTeleportBookmarkDAO().insert(this, id, x, y, z, icon, tag, name);
+		teleportBookmarkDAO.insert(this, id, x, y, z, icon, tag, name);
 	}
 	
 	@Override
@@ -10358,7 +10282,7 @@ public final class L2PcInstance extends L2Playable {
 		return super.isMovementDisabled() || (_movieId > 0);
 	}
 	
-	private void restoreUISettings() {
+	public void restoreUISettings() {
 		_uiKeySettings = new UIKeysSettings(getObjectId());
 	}
 	
@@ -10574,11 +10498,11 @@ public final class L2PcInstance extends L2Playable {
 			recoTaskEnd = Math.max(0, _recoBonusTask.getDelay(TimeUnit.MILLISECONDS));
 		}
 		
-		DAOFactory.getInstance().getRecommendationBonusDAO().insert(this, recoTaskEnd);
+		recommendationBonusDAO.insert(this, recoTaskEnd);
 	}
 	
 	public void checkRecoBonusTask() {
-		final long taskTime = DAOFactory.getInstance().getRecommendationBonusDAO().load(this);
+		final long taskTime = recommendationBonusDAO.load(this);
 		if (taskTime > 0) {
 			// Add 20 recos on first login
 			if (taskTime == 3600000) {

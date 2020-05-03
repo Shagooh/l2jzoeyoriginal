@@ -20,6 +20,7 @@ package com.l2jserver.gameserver.dao.impl.mysql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.PetDAO;
@@ -34,6 +35,7 @@ import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
  * Pet DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class PetDAOMySQLImpl implements PetDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(PetDAOMySQLImpl.class);

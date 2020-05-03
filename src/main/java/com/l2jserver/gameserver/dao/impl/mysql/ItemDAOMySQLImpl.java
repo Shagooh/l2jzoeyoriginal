@@ -20,6 +20,7 @@ package com.l2jserver.gameserver.dao.impl.mysql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.ItemDAO;
@@ -29,6 +30,7 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
  * Item DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class ItemDAOMySQLImpl implements ItemDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ItemDAOMySQLImpl.class);

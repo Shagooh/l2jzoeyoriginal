@@ -28,11 +28,13 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.ai.CtrlIntention;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.dao.PetDAO;
+import com.l2jserver.gameserver.dao.PetSkillSaveDAO;
 import com.l2jserver.gameserver.data.sql.impl.CharSummonTable;
 import com.l2jserver.gameserver.data.sql.impl.SummonEffectsTable;
 import com.l2jserver.gameserver.data.xml.impl.PetDataTable;
@@ -91,6 +93,12 @@ public class L2PetInstance extends L2Summon {
 	private int _curWeightPenalty = 0;
 	
 	protected boolean _bufferMode = true;
+	
+	@Autowired
+	private PetDAO petDAO;
+
+	@Autowired
+	private PetSkillSaveDAO petSkillSaveDAO;
 	
 	/**
 	 * Creates a pet.
@@ -217,24 +225,6 @@ public class L2PetInstance extends L2Summon {
 			}
 			return getPetLevelData().getPetFeedNormal();
 		}
-	}
-	
-	public synchronized static L2PetInstance spawnPet(L2NpcTemplate template, L2PcInstance owner, L2ItemInstance control) {
-		if (L2World.getInstance().getPet(owner.getObjectId()) != null) {
-			return null; // owner has a pet listed in world
-		}
-		final L2PetData data = PetDataTable.getInstance().getPetData(template.getId());
-		
-		final L2PetInstance pet = DAOFactory.getInstance().getPetDAO().load(control, template, owner);
-		if (pet != null) {
-			pet.setTitle(owner.getName());
-			if (data.isSynchLevel() && (pet.getLevel() != owner.getLevel())) {
-				pet.getStat().setLevel(owner.getLevel());
-				pet.getStat().setExp(pet.getStat().getExpForLevel(owner.getLevel()));
-			}
-			L2World.getInstance().addPet(owner.getObjectId(), pet);
-		}
-		return pet;
 	}
 	
 	@Override
@@ -672,7 +662,7 @@ public class L2PetInstance extends L2Summon {
 		}
 		
 		// Pet control item no longer exists, delete the pet from the database.
-		DAOFactory.getInstance().getPetDAO().delete(this);
+		petDAO.delete(this);
 	}
 	
 	public void dropAllItems() {
@@ -727,9 +717,9 @@ public class L2PetInstance extends L2Summon {
 		}
 		
 		if (!isRespawned()) {
-			DAOFactory.getInstance().getPetDAO().insert(this);
+			petDAO.insert(this);
 		} else {
-			DAOFactory.getInstance().getPetDAO().update(this);
+			petDAO.update(this);
 		}
 		
 		setRespawned(true);
@@ -756,12 +746,12 @@ public class L2PetInstance extends L2Summon {
 		// Clear list for overwrite
 		SummonEffectsTable.getInstance().clearPetEffects(getControlObjectId());
 		
-		DAOFactory.getInstance().getPetSkillSaveDAO().insert(this, storeEffects);
+		petSkillSaveDAO.insert(this, storeEffects);
 	}
 	
 	@Override
 	public void restoreEffects() {
-		DAOFactory.getInstance().getPetSkillSaveDAO().load(this);
+		petSkillSaveDAO.load(this);
 		SummonEffectsTable.getInstance().applyPetEffects(this, getControlObjectId());
 	}
 	

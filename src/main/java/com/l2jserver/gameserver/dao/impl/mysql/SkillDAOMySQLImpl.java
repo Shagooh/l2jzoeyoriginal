@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.SkillDAO;
@@ -40,6 +41,7 @@ import com.l2jserver.gameserver.util.Util;
  * Skill DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class SkillDAOMySQLImpl implements SkillDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SkillDAOMySQLImpl.class);

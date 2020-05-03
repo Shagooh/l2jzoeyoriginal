@@ -21,6 +21,8 @@ package com.l2jserver.gameserver.model.actor.instance;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.instancemanager.ClanHallManager;
@@ -32,6 +34,10 @@ import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Evolve;
 
 public class L2ClanHallDoormenInstance extends L2DoormenInstance {
+	
+	@Autowired
+	private Evolve evolve;
+	
 	private volatile boolean _init = false;
 	private ClanHall _clanHall = null;
 	private boolean _hasEvolve = false;
@@ -75,19 +81,19 @@ public class L2ClanHallDoormenInstance extends L2DoormenInstance {
 				boolean ok = false;
 				switch (Integer.parseInt(st.nextToken())) {
 					case 1:
-						ok = Evolve.doEvolve(player, this, 9882, 10307, 55);
+						ok = evolve.doEvolve(player, this, 9882, 10307, 55);
 						break;
 					case 2:
-						ok = Evolve.doEvolve(player, this, 4422, 10308, 55);
+						ok = evolve.doEvolve(player, this, 4422, 10308, 55);
 						break;
 					case 3:
-						ok = Evolve.doEvolve(player, this, 4423, 10309, 55);
+						ok = evolve.doEvolve(player, this, 4423, 10309, 55);
 						break;
 					case 4:
-						ok = Evolve.doEvolve(player, this, 4424, 10310, 55);
+						ok = evolve.doEvolve(player, this, 4424, 10310, 55);
 						break;
 					case 5:
-						ok = Evolve.doEvolve(player, this, 10426, 10611, 70);
+						ok = evolve.doEvolve(player, this, 10426, 10611, 70);
 						break;
 				}
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());

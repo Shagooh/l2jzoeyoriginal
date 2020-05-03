@@ -25,6 +25,7 @@ import java.util.Calendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.LoginServerThread;
@@ -35,6 +36,7 @@ import com.l2jserver.gameserver.model.TradeItem;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.gameserver.network.L2GameClient.GameClientState;
+import com.l2jserver.gameserver.service.PlayerService;
 
 public class OfflineTradersTable {
 	
@@ -51,6 +53,9 @@ public class OfflineTradersTable {
 	private static final String LOAD_OFFLINE_STATUS = "SELECT * FROM character_offline_trade";
 	
 	private static final String LOAD_OFFLINE_ITEMS = "SELECT * FROM character_offline_trade_items WHERE charId = ?";
+	
+	@Autowired
+	private PlayerService playerService;
 	
 	public void storeOffliners() {
 		try (var con = ConnectionFactory.getInstance().getConnection();
@@ -161,7 +166,7 @@ public class OfflineTradersTable {
 				try {
 					L2GameClient client = new L2GameClient(null);
 					client.setDetached(true);
-					player = L2PcInstance.load(rs.getInt("charId"));
+					player = playerService.load(rs.getInt("charId"));
 					client.setActiveChar(player);
 					player.setOnlineStatus(true, false);
 					client.setAccountName(player.getAccountNamePlayer());

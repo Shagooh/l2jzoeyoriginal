@@ -18,7 +18,9 @@
  */
 package com.l2jserver.gameserver.network.clientpackets;
 
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.l2jserver.gameserver.dao.PremiumItemDAO;
 import com.l2jserver.gameserver.model.L2PremiumItem;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
@@ -26,10 +28,14 @@ import com.l2jserver.gameserver.network.serverpackets.ExGetPremiumItemList;
 import com.l2jserver.gameserver.util.Util;
 
 /**
+ * RequestWithDrawPremiumItem client packet.
  * @author Gnacik
  */
 public final class RequestWithDrawPremiumItem extends L2GameClientPacket {
 	private static final String _C__D0_52_REQUESTWITHDRAWPREMIUMITEM = "[C] D0:52 RequestWithDrawPremiumItem";
+	
+	@Autowired
+	private PremiumItemDAO premiumItemDAO;
 	
 	private int _itemNum;
 	private int _charId;
@@ -77,10 +83,10 @@ public final class RequestWithDrawPremiumItem extends L2GameClientPacket {
 		
 		if (itemsLeft > 0) {
 			_item.updateCount(itemsLeft);
-			DAOFactory.getInstance().getPremiumItemDAO().update(activeChar, _itemNum, itemsLeft);
+			premiumItemDAO.update(activeChar, _itemNum, itemsLeft);
 		} else {
 			activeChar.getPremiumItemList().remove(_itemNum);
-			DAOFactory.getInstance().getPremiumItemDAO().delete(activeChar, _itemNum);
+			premiumItemDAO.delete(activeChar, _itemNum);
 		}
 		
 		if (activeChar.getPremiumItemList().isEmpty()) {

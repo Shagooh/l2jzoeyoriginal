@@ -21,12 +21,18 @@ package com.l2jserver.gameserver.model.actor.instance;
 import static com.l2jserver.gameserver.config.Configuration.general;
 import static com.l2jserver.gameserver.config.Configuration.npc;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.model.actor.templates.L2NpcTemplate;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Evolve;
 
 public class L2PetManagerInstance extends L2MerchantInstance {
+	
+	@Autowired
+	private Evolve evolve;
+	
 	/**
 	 * Creates a pet manager.
 	 * @param template the pet manager NPC template.
@@ -91,19 +97,19 @@ public class L2PetManagerInstance extends L2MerchantInstance {
 				// Info evolve(player, "curent pet summon item", "new pet summon item", "lvl required to evolve")
 				// To ignore evolve just put value 0 where do you like example: evolve(player, 0, 9882, 55);
 				case 1:
-					ok = Evolve.doEvolve(player, this, 2375, 9882, 55);
+					ok = evolve.doEvolve(player, this, 2375, 9882, 55);
 					break;
 				case 2:
-					ok = Evolve.doEvolve(player, this, 9882, 10426, 70);
+					ok = evolve.doEvolve(player, this, 9882, 10426, 70);
 					break;
 				case 3:
-					ok = Evolve.doEvolve(player, this, 6648, 10311, 55);
+					ok = evolve.doEvolve(player, this, 6648, 10311, 55);
 					break;
 				case 4:
-					ok = Evolve.doEvolve(player, this, 6650, 10313, 55);
+					ok = evolve.doEvolve(player, this, 6650, 10313, 55);
 					break;
 				case 5:
-					ok = Evolve.doEvolve(player, this, 6649, 10312, 55);
+					ok = evolve.doEvolve(player, this, 6649, 10312, 55);
 					break;
 			}
 			if (!ok) {
@@ -119,19 +125,19 @@ public class L2PetManagerInstance extends L2MerchantInstance {
 			switch (val) {
 				// Info evolve(player, "curent pet summon item", "new pet summon item", "lvl required to evolve")
 				case 1:
-					ok = Evolve.doRestore(player, this, 10307, 9882, 55);
+					ok = evolve.doRestore(player, this, 10307, 9882, 55);
 					break;
 				case 2:
-					ok = Evolve.doRestore(player, this, 10611, 10426, 70);
+					ok = evolve.doRestore(player, this, 10611, 10426, 70);
 					break;
 				case 3:
-					ok = Evolve.doRestore(player, this, 10308, 4422, 55);
+					ok = evolve.doRestore(player, this, 10308, 4422, 55);
 					break;
 				case 4:
-					ok = Evolve.doRestore(player, this, 10309, 4423, 55);
+					ok = evolve.doRestore(player, this, 10309, 4423, 55);
 					break;
 				case 5:
-					ok = Evolve.doRestore(player, this, 10310, 4424, 55);
+					ok = evolve.doRestore(player, this, 10310, 4424, 55);
 					break;
 			}
 			if (!ok) {

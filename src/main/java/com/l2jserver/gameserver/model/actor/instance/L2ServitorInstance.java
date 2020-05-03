@@ -22,8 +22,10 @@ import static com.l2jserver.gameserver.config.Configuration.character;
 
 import java.util.concurrent.Future;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.l2jserver.gameserver.ThreadPoolManager;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.dao.ServitorSkillSaveDAO;
 import com.l2jserver.gameserver.data.sql.impl.CharSummonTable;
 import com.l2jserver.gameserver.data.sql.impl.SummonEffectsTable;
 import com.l2jserver.gameserver.enums.InstanceType;
@@ -39,9 +41,14 @@ import com.l2jserver.gameserver.network.serverpackets.SetSummonRemainTime;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 
 /**
+ * Servitor.
  * @author UnAfraid
  */
 public class L2ServitorInstance extends L2Summon implements Runnable {
+	
+	@Autowired
+	private ServitorSkillSaveDAO servitorSkillSaveDAO;
+	
 	private float _expMultiplier = 0;
 	private ItemHolder _itemConsume;
 	private int _lifeTime;
@@ -181,7 +188,7 @@ public class L2ServitorInstance extends L2Summon implements Runnable {
 		// Clear list for overwrite
 		SummonEffectsTable.getInstance().clearServitorEffects(getOwner(), getReferenceSkill());
 		
-		DAOFactory.getInstance().getServitorSkillSaveDAO().insert(this, storeEffects);
+		servitorSkillSaveDAO.insert(this, storeEffects);
 	}
 	
 	@Override
@@ -190,7 +197,7 @@ public class L2ServitorInstance extends L2Summon implements Runnable {
 			return;
 		}
 		
-		DAOFactory.getInstance().getServitorSkillSaveDAO().load(this);
+		servitorSkillSaveDAO.load(this);
 		
 		SummonEffectsTable.getInstance().applyServitorEffects(this, getOwner(), getReferenceSkill());
 	}

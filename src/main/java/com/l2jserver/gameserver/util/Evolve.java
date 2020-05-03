@@ -21,6 +21,9 @@ package com.l2jserver.gameserver.util;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.data.xml.impl.NpcData;
@@ -38,15 +41,20 @@ import com.l2jserver.gameserver.network.serverpackets.MagicSkillLaunched;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.StatusUpdate;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import com.l2jserver.gameserver.service.PetService;
 
 /**
  * UnAfraid: TODO: MOVE IT TO DP AI
  */
+@Component
 public final class Evolve {
 	
 	private static final Logger _log = Logger.getLogger(Evolve.class.getName());
 	
-	public static final boolean doEvolve(L2PcInstance player, L2Npc npc, int itemIdtake, int itemIdgive, int petminlvl) {
+	@Autowired
+	private PetService petService;
+	
+	public boolean doEvolve(L2PcInstance player, L2Npc npc, int itemIdtake, int itemIdgive, int petminlvl) {
 		if ((itemIdtake == 0) || (itemIdgive == 0) || (petminlvl == 0)) {
 			return false;
 		}
@@ -102,8 +110,7 @@ public final class Evolve {
 		item = player.getInventory().addItem("Evolve", itemIdgive, 1, player, npc);
 		
 		// Summoning new pet
-		L2PetInstance petSummon = L2PetInstance.spawnPet(npcTemplate, player, item);
-		
+		final var petSummon = petService.spawn(npcTemplate, player, item);
 		if (petSummon == null) {
 			return false;
 		}
@@ -143,7 +150,7 @@ public final class Evolve {
 		return true;
 	}
 	
-	public static final boolean doRestore(L2PcInstance player, L2Npc npc, int itemIdtake, int itemIdgive, int petminlvl) {
+	public boolean doRestore(L2PcInstance player, L2Npc npc, int itemIdtake, int itemIdgive, int petminlvl) {
 		if ((itemIdtake == 0) || (itemIdgive == 0) || (petminlvl == 0)) {
 			return false;
 		}
@@ -185,7 +192,7 @@ public final class Evolve {
 		L2ItemInstance addedItem = player.getInventory().addItem("PetRestore", itemIdgive, 1, player, npc);
 		
 		// Summoning new pet
-		L2PetInstance petSummon = L2PetInstance.spawnPet(npcTemplate, player, addedItem);
+		L2PetInstance petSummon = petService.spawn(npcTemplate, player, addedItem);
 		if (petSummon == null) {
 			return false;
 		}

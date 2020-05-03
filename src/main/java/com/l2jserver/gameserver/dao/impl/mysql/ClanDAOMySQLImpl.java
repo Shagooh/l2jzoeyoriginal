@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.ClanDAO;
@@ -31,6 +32,7 @@ import com.l2jserver.gameserver.dao.ClanDAO;
  * Clan DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class ClanDAOMySQLImpl implements ClanDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ClanDAOMySQLImpl.class);

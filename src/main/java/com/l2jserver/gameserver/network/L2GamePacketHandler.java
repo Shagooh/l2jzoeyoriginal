@@ -23,6 +23,10 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
 import com.l2jserver.commons.util.Util;
 import com.l2jserver.gameserver.network.L2GameClient.GameClientState;
 import com.l2jserver.gameserver.network.clientpackets.*;
@@ -42,10 +46,13 @@ import com.l2jserver.mmocore.ReceivablePacket;
  * Note: If for a given exception a packet needs to be handled on more then one state, then it should be added to all these states.
  * @author KenM
  */
+@Component
 public final class L2GamePacketHandler implements IPacketHandler<L2GameClient>, IClientFactory<L2GameClient>, IMMOExecutor<L2GameClient> {
 	private static final Logger _log = Logger.getLogger(L2GamePacketHandler.class.getName());
 	
-	// implementation
+	@Autowired
+	private ApplicationContext applicationContext;
+	
 	@Override
 	public ReceivablePacket<L2GameClient> handlePacket(ByteBuffer buf, L2GameClient client) {
 		if (client.dropPacket()) {
@@ -1190,10 +1197,9 @@ public final class L2GamePacketHandler implements IPacketHandler<L2GameClient>, 
 		_log.warning(Util.printData(array, size));
 	}
 	
-	// impl
 	@Override
 	public L2GameClient create(MMOConnection<L2GameClient> con) {
-		return new L2GameClient(con);
+		return applicationContext.getBean(L2GameClient.class, con);
 	}
 	
 	@Override

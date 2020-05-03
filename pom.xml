@@ -52,7 +52,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>${maven-assembly-plugin.version}</version><!--$NO-MVN-MAN-VER$-->
+				<version>${maven-assembly-plugin.version}</version><!-- $NO-MVN-MAN-VER$ -->
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -112,6 +112,11 @@
 			<groupId>org.aeonbits.owner</groupId>
 			<artifactId>owner-java8</artifactId>
 			<version>${owner.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>5.2.6.RELEASE</version>
 		</dependency>
 		<!-- L2J -->
 		<dependency>

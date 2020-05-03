@@ -24,6 +24,7 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 import static com.l2jserver.gameserver.config.Configuration.mmo;
 import static com.l2jserver.gameserver.model.PcCondOverride.SEE_ALL_PLAYERS;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,6 +38,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.LoginServerThread;
@@ -57,6 +61,7 @@ import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.L2GameServerPacket;
 import com.l2jserver.gameserver.network.serverpackets.ServerClose;
 import com.l2jserver.gameserver.security.SecondaryPasswordAuth;
+import com.l2jserver.gameserver.service.PlayerService;
 import com.l2jserver.gameserver.util.FloodProtectors;
 import com.l2jserver.gameserver.util.Util;
 import com.l2jserver.mmocore.MMOClient;
@@ -67,6 +72,8 @@ import com.l2jserver.mmocore.ReceivablePacket;
  * Represents a client connected on Game Server.
  * @author KenM
  */
+@Component
+@Scope(SCOPE_PROTOTYPE)
 public final class L2GameClient extends MMOClient<MMOConnection<L2GameClient>> implements Runnable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(L2GameClient.class);
@@ -88,6 +95,9 @@ public final class L2GameClient extends MMOClient<MMOConnection<L2GameClient>> i
 		/** Client has selected a char and is in game. */
 		IN_GAME
 	}
+	
+	@Autowired
+	private PlayerService playerService;
 	
 	private GameClientState _state;
 	
@@ -507,7 +517,7 @@ public final class L2GameClient extends MMOClient<MMOConnection<L2GameClient>> i
 			return null;
 		}
 		
-		character = L2PcInstance.load(objId);
+		character = playerService.load(objId);
 		if (character != null) {
 			character.setRunning();
 			character.standUp();

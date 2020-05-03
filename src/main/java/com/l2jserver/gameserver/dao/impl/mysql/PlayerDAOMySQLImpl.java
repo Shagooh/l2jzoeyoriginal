@@ -24,10 +24,13 @@ import java.sql.Timestamp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.PlayerDAO;
-import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.dao.SubclassDAO;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.enums.Sex;
 import com.l2jserver.gameserver.instancemanager.CursedWeaponsManager;
@@ -41,6 +44,7 @@ import com.l2jserver.gameserver.model.entity.Hero;
  * Player DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class PlayerDAOMySQLImpl implements PlayerDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(PlayerDAOMySQLImpl.class);
@@ -55,6 +59,12 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 	
 	private static final String SELECT_CHARACTERS = "SELECT charId, char_name FROM characters WHERE account_name=? AND charId<>?";
 	
+	@Autowired
+	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private SubclassDAO subclassDAO;
+	
 	@Override
 	public L2PcInstance load(int objectId) {
 		L2PcInstance player = null;
@@ -68,7 +78,7 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 					final boolean female = rset.getInt("sex") != Sex.MALE.ordinal();
 					PcAppearance app = new PcAppearance(rset.getByte("face"), rset.getByte("hairColor"), rset.getByte("hairStyle"), female);
 					
-					player = new L2PcInstance(objectId, activeClassId, rset.getString("account_name"), app);
+					player = applicationContext.getBean(L2PcInstance.class, objectId, activeClassId, rset.getString("account_name"), app);
 					player.setName(rset.getString("char_name"));
 					player.setLastAccess(rset.getLong("lastAccess"));
 					player.setExp(rset.getLong("exp"));
@@ -112,7 +122,7 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 					player.setBaseClass(rset.getInt("base_class"));
 					
 					// Restore Subclass Data (cannot be done earlier in function)
-					DAOFactory.getInstance().getSubclassDAO().load(player);
+					subclassDAO.load(player);
 					
 					if (activeClassId != player.getBaseClass()) {
 						for (SubClass subClass : player.getSubClasses().values()) {

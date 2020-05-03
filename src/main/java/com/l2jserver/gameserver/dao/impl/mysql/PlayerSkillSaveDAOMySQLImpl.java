@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.dao.PlayerSkillSaveDAO;
@@ -41,6 +42,7 @@ import com.l2jserver.gameserver.model.skills.Skill;
  * Player Skill Save DAO MySQL implementation.
  * @author Zoey76
  */
+@Repository
 public class PlayerSkillSaveDAOMySQLImpl implements PlayerSkillSaveDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(PlayerSkillSaveDAOMySQLImpl.class);

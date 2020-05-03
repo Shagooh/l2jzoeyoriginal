@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
 import com.l2jserver.gameserver.data.xml.impl.InitialEquipmentData;
@@ -50,6 +51,7 @@ import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.gameserver.network.serverpackets.CharCreateFail;
 import com.l2jserver.gameserver.network.serverpackets.CharCreateOk;
 import com.l2jserver.gameserver.network.serverpackets.CharSelectionInfo;
+import com.l2jserver.gameserver.service.PlayerService;
 
 @SuppressWarnings("unused")
 public final class CharacterCreate extends L2GameClientPacket {
@@ -59,6 +61,9 @@ public final class CharacterCreate extends L2GameClientPacket {
 	private static final String _C__0C_CHARACTERCREATE = "[C] 0C CharacterCreate";
 	
 	private static final int PLAYER_NAME_MAX_LENGHT = 16;
+	
+	@Autowired
+	private PlayerService playerService;
 	
 	// cSdddddddddddd
 	private String _name;
@@ -169,7 +174,7 @@ public final class CharacterCreate extends L2GameClientPacket {
 				return;
 			}
 			final PcAppearance app = new PcAppearance(_face, _hairColor, _hairStyle, _sex != 0);
-			newChar = L2PcInstance.create(_classId, getClient().getAccountName(), _name, app);
+			newChar = playerService.create(_classId, getClient().getAccountName(), _name, app);
 		}
 		
 		// HP and MP are at maximum and CP is zero by default.
