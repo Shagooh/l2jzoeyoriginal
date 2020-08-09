@@ -83,6 +83,7 @@ import com.l2jserver.gameserver.model.events.annotations.RegisterEvent;
 import com.l2jserver.gameserver.model.events.annotations.RegisterType;
 import com.l2jserver.gameserver.model.events.impl.IBaseEvent;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureKill;
+import com.l2jserver.gameserver.model.events.impl.character.OnCreatureSee;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneEnter;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneExit;
 import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcCanBeSeen;
@@ -351,6 +352,15 @@ public abstract class AbstractScript implements INamable {
 	protected final List<AbstractEventListener> setCreatureKillId(Consumer<OnCreatureKill> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_CREATURE_KILL, ListenerRegisterType.NPC, npcIds);
 	}
+	
+	/**
+	 * Provides instant callback operation when {@link L2Character} sees another creature.
+	 * @param callback
+	 * @return
+	 */
+	protected final List<AbstractEventListener> setCreatureSee(Consumer<OnCreatureSee> callback) {
+		return registerConsumer(callback, EventType.ON_CREATURE_SEE, ListenerRegisterType.GLOBAL);
+	}	
 	
 	// ---------------------------------------------------------------------------------------------------------------------------
 	

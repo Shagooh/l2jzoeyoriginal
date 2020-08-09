@@ -28,6 +28,9 @@ import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Summon;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.events.EventDispatcher;
+import com.l2jserver.gameserver.model.events.impl.character.OnCreatureSee;
+import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.util.Util;
 
 public class CharKnownList extends ObjectKnownList {
@@ -43,6 +46,13 @@ public class CharKnownList extends ObjectKnownList {
 	public boolean addKnownObject(L2Object object) {
 		if (!super.addKnownObject(object)) {
 			return false;
+		}
+
+		if (object.isCharacter()) {
+			final TerminateReturn term = EventDispatcher.getInstance().notifyEvent(new OnCreatureSee(getActiveChar(), (L2Character) object), TerminateReturn.class);
+				if ((term != null) && term.terminate()) {
+				return false;
+			}
 		}
 		
 		if (object.isPlayer()) {
