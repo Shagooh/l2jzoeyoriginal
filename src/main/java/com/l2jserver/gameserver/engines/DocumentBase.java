@@ -53,6 +53,7 @@ import com.l2jserver.gameserver.model.conditions.ConditionLogicOr;
 import com.l2jserver.gameserver.model.conditions.ConditionMinDistance;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerActiveEffectId;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerActiveSkillId;
+import com.l2jserver.gameserver.model.conditions.ConditionPlayerAgathionEnergy;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerAgathionId;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerCallPc;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerCanCreateBase;
@@ -74,6 +75,7 @@ import com.l2jserver.gameserver.model.conditions.ConditionPlayerCloakStatus;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerCp;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerFlyMounted;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerGrade;
+import com.l2jserver.gameserver.model.conditions.ConditionPlayerHasAgathion;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerHasCastle;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerHasClanHall;
 import com.l2jserver.gameserver.model.conditions.ConditionPlayerHasFort;
@@ -206,23 +208,13 @@ public abstract class DocumentBase {
 			final String name = n.getNodeName().toLowerCase();
 			
 			switch (name) {
-				case "effect": {
+				case "effect" -> {
 					if (template instanceof AbstractEffect) {
 						throw new RuntimeException("Nested effects");
 					}
 					attachEffect(n, template, condition, effectScope);
-					break;
 				}
-				case "add":
-				case "sub":
-				case "mul":
-				case "div":
-				case "set":
-				case "share":
-				case "enchant":
-				case "enchanthp": {
-					attachFunc(n, template, name, condition);
-				}
+				case "add", "sub", "mul", "div", "set", "share", "enchant", "enchanthp" -> attachFunc(n, template, name, condition);
 			}
 		}
 	}
@@ -243,8 +235,8 @@ public abstract class DocumentBase {
 			value = Double.parseDouble(valueString);
 		}
 		
-		final Condition applayCond = parseCondition(n.getFirstChild(), template);
-		final FuncTemplate ft = new FuncTemplate(attachCond, applayCond, functionName, order, stat, value);
+		final Condition applyCond = parseCondition(n.getFirstChild(), template);
+		final FuncTemplate ft = new FuncTemplate(attachCond, applyCond, functionName, order, stat, value);
 		if (template instanceof L2Item) {
 			((L2Item) template).attach(ft);
 		} else if (template instanceof AbstractEffect) {
@@ -267,13 +259,13 @@ public abstract class DocumentBase {
 		}
 		
 		final StatsSet parameters = parseParameters(n.getFirstChild(), template);
-		final Condition applayCond = parseCondition(n.getFirstChild(), template);
+		final Condition applyCond = parseCondition(n.getFirstChild(), template);
 		
 		if (template instanceof IIdentifiable) {
 			set.set("id", ((IIdentifiable) template).getId());
 		}
 		
-		final AbstractEffect effect = AbstractEffect.createEffect(attachCond, applayCond, set, parameters);
+		final AbstractEffect effect = AbstractEffect.createEffect(attachCond, applyCond, set, parameters);
 		parseTemplate(n, effect);
 		if (template instanceof L2Item) {
 			_log.severe("Item " + template + " with effects!!!");
@@ -322,34 +314,13 @@ public abstract class DocumentBase {
 		Condition condition = null;
 		if (n != null) {
 			switch (n.getNodeName().toLowerCase()) {
-				case "and": {
-					condition = parseLogicAnd(n, template);
-					break;
-				}
-				case "or": {
-					condition = parseLogicOr(n, template);
-					break;
-				}
-				case "not": {
-					condition = parseLogicNot(n, template);
-					break;
-				}
-				case "player": {
-					condition = parsePlayerCondition(n, template);
-					break;
-				}
-				case "target": {
-					condition = parseTargetCondition(n, template);
-					break;
-				}
-				case "using": {
-					condition = parseUsingCondition(n);
-					break;
-				}
-				case "game": {
-					condition = parseGameCondition(n);
-					break;
-				}
+				case "and" -> condition = parseLogicAnd(n, template);
+				case "or" -> condition = parseLogicOr(n, template);
+				case "not" -> condition = parseLogicNot(n, template);
+				case "player" -> condition = parsePlayerCondition(n, template);
+				case "target" -> condition = parseTargetCondition(n, template);
+				case "using" -> condition = parseUsingCondition(n);
+				case "game" -> condition = parseGameCondition(n);
 			}
 		}
 		return condition;
@@ -397,7 +368,7 @@ public abstract class DocumentBase {
 		for (int i = 0; i < attrs.getLength(); i++) {
 			Node a = attrs.item(i);
 			switch (a.getNodeName().toLowerCase()) {
-				case "races": {
+				case "races" -> {
 					final String[] racesVal = a.getNodeValue().split(",");
 					final Race[] races = new Race[racesVal.length];
 					for (int r = 0; r < racesVal.length; r++) {
@@ -406,149 +377,120 @@ public abstract class DocumentBase {
 						}
 					}
 					cond = joinAnd(cond, new ConditionPlayerRace(races));
-					break;
 				}
-				case "level": {
+				case "level" -> {
 					int lvl = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerLevel(lvl));
-					break;
 				}
-				case "levelrange": {
+				case "levelrange" -> {
 					String[] range = getValue(a.getNodeValue(), template).split(";");
 					if (range.length == 2) {
-						int[] lvlRange = new int[2];
-						lvlRange[0] = Integer.decode(getValue(a.getNodeValue(), template).split(";")[0]);
-						lvlRange[1] = Integer.decode(getValue(a.getNodeValue(), template).split(";")[1]);
-						cond = joinAnd(cond, new ConditionPlayerLevelRange(lvlRange));
+						final int minimumLevel = Integer.decode(getValue(a.getNodeValue(), template).split(";")[0]);
+						final int maximumLevel = Integer.decode(getValue(a.getNodeValue(), template).split(";")[1]);
+						cond = joinAnd(cond, new ConditionPlayerLevelRange(minimumLevel, maximumLevel));
 					}
-					break;
 				}
-				case "resting": {
+				case "resting" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.RESTING, val));
-					break;
 				}
-				case "flying": {
+				case "flying" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.FLYING, val));
-					break;
 				}
-				case "moving": {
+				case "moving" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.MOVING, val));
-					break;
 				}
-				case "running": {
+				case "running" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.RUNNING, val));
-					break;
 				}
-				case "standing": {
+				case "standing" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.STANDING, val));
-					break;
 				}
-				case "behind": {
+				case "behind" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.BEHIND, val));
-					break;
 				}
-				case "front": {
+				case "front" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.FRONT, val));
-					break;
 				}
-				case "chaotic": {
+				case "chaotic" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.CHAOTIC, val));
-					break;
 				}
-				case "olympiad": {
+				case "olympiad" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerState(PlayerState.OLYMPIAD, val));
-					break;
 				}
-				case "ishero": {
+				case "ishero" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerIsHero(val));
-					break;
 				}
-				case "transformationid": {
+				case "transformationid" -> {
 					int id = Integer.parseInt(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerTransformationId(id));
-					break;
 				}
-				case "hp": {
+				case "hp" -> {
 					int hp = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerHp(hp));
-					break;
 				}
-				case "mp": {
+				case "mp" -> {
 					int hp = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerMp(hp));
-					break;
 				}
-				case "cp": {
+				case "cp" -> {
 					int cp = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerCp(cp));
-					break;
 				}
-				case "grade": {
+				case "grade" -> {
 					int expIndex = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerGrade(expIndex));
-					break;
 				}
-				case "pkcount": {
+				case "pkcount" -> {
 					int expIndex = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerPkCount(expIndex));
-					break;
 				}
-				case "siegezone": {
+				case "siegezone" -> {
 					int value = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionSiegeZone(value, true));
-					break;
 				}
-				case "siegeside": {
+				case "siegeside" -> {
 					int value = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerSiegeSide(value));
-					break;
 				}
-				case "charges": {
+				case "charges" -> {
 					int value = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerCharges(value));
-					break;
 				}
-				case "souls": {
+				case "souls" -> {
 					int value = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerSouls(value));
-					break;
 				}
-				case "weight": {
+				case "weight" -> {
 					int weight = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerWeight(weight));
-					break;
 				}
-				case "invsize": {
+				case "invsize" -> {
 					int size = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerInvSize(size));
-					break;
 				}
-				case "isclanleader": {
+				case "isclanleader" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerIsClanLeader(val));
-					break;
 				}
-				case "ontvtevent": {
+				case "ontvtevent" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerTvTEvent(val));
-					break;
 				}
-				case "pledgeclass": {
+				case "pledgeclass" -> {
 					int pledgeClass = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerPledgeClass(pledgeClass));
-					break;
 				}
-				case "clanhall": {
+				case "clanhall" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					ArrayList<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -556,63 +498,52 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionPlayerHasClanHall(array));
-					break;
 				}
-				case "fort": {
+				case "fort" -> {
 					int fort = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerHasFort(fort));
-					break;
 				}
-				case "castle": {
+				case "castle" -> {
 					int castle = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerHasCastle(castle));
-					break;
 				}
-				case "sex": {
+				case "sex" -> {
 					int sex = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionPlayerSex(sex));
-					break;
 				}
-				case "flymounted": {
+				case "flymounted" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerFlyMounted(val));
-					break;
 				}
-				case "vehiclemounted": {
+				case "vehiclemounted" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerVehicleMounted(val));
-					break;
 				}
-				case "landingzone": {
+				case "landingzone" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerLandingZone(val));
-					break;
 				}
-				case "active_effect_id": {
-					int effect_id = Integer.decode(getValue(a.getNodeValue(), template));
-					cond = joinAnd(cond, new ConditionPlayerActiveEffectId(effect_id));
-					break;
+				case "active_effect_id" -> {
+					int effectId = Integer.decode(getValue(a.getNodeValue(), template));
+					cond = joinAnd(cond, new ConditionPlayerActiveEffectId(effectId));
 				}
-				case "active_effect_id_lvl": {
+				case "active_effect_id_lvl" -> {
 					String val = getValue(a.getNodeValue(), template);
 					int effect_id = Integer.decode(getValue(val.split(",")[0], template));
 					int effect_lvl = Integer.decode(getValue(val.split(",")[1], template));
 					cond = joinAnd(cond, new ConditionPlayerActiveEffectId(effect_id, effect_lvl));
-					break;
 				}
-				case "active_skill_id": {
+				case "active_skill_id" -> {
 					int skill_id = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionPlayerActiveSkillId(skill_id));
-					break;
 				}
-				case "active_skill_id_lvl": {
+				case "active_skill_id_lvl" -> {
 					String val = getValue(a.getNodeValue(), template);
 					int skill_id = Integer.decode(getValue(val.split(",")[0], template));
 					int skill_lvl = Integer.decode(getValue(val.split(",")[1], template));
 					cond = joinAnd(cond, new ConditionPlayerActiveSkillId(skill_id, skill_lvl));
-					break;
 				}
-				case "class_id_restriction": {
+				case "class_id_restriction" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					ArrayList<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -620,14 +551,12 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionPlayerClassIdRestriction(array));
-					break;
 				}
-				case "subclass": {
+				case "subclass" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerSubclass(val));
-					break;
 				}
-				case "instanceid": {
+				case "instanceid" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					ArrayList<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -635,19 +564,16 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionPlayerInstanceId(array));
-					break;
 				}
-				case "agathionid": {
+				case "agathionid" -> {
 					int agathionId = Integer.decode(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerAgathionId(agathionId));
-					break;
 				}
-				case "cloakstatus": {
+				case "cloakstatus" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionPlayerCloakStatus(val));
-					break;
 				}
-				case "haspet": {
+				case "haspet" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					ArrayList<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -655,13 +581,9 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionPlayerHasPet(array));
-					break;
 				}
-				case "hasservitor": {
-					cond = joinAnd(cond, new ConditionPlayerHasServitor());
-					break;
-				}
-				case "npcidradius": {
+				case "hasservitor" -> cond = joinAnd(cond, new ConditionPlayerHasServitor());
+				case "npcidradius" -> {
 					final StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					if (st.countTokens() == 3) {
 						final String[] ids = st.nextToken().split(";");
@@ -673,61 +595,21 @@ public abstract class DocumentBase {
 						final boolean val = Boolean.parseBoolean(st.nextToken());
 						cond = joinAnd(cond, new ConditionPlayerRangeFromNpc(npcIds, radius, val));
 					}
-					break;
 				}
-				case "callpc": {
-					cond = joinAnd(cond, new ConditionPlayerCallPc(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cancreatebase": {
-					cond = joinAnd(cond, new ConditionPlayerCanCreateBase(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cancreateoutpost": {
-					cond = joinAnd(cond, new ConditionPlayerCanCreateOutpost(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "canescape": {
-					cond = joinAnd(cond, new ConditionPlayerCanEscape(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "canrefuelairship": {
-					cond = joinAnd(cond, new ConditionPlayerCanRefuelAirship(Integer.parseInt(a.getNodeValue())));
-					break;
-				}
-				case "canresurrect": {
-					cond = joinAnd(cond, new ConditionPlayerCanResurrect(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cansummon": {
-					cond = joinAnd(cond, new ConditionPlayerCanSummon(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cansummonsiegegolem": {
-					cond = joinAnd(cond, new ConditionPlayerCanSummonSiegeGolem(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cansweep": {
-					cond = joinAnd(cond, new ConditionPlayerCanSweep(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cantakecastle": {
-					cond = joinAnd(cond, new ConditionPlayerCanTakeCastle());
-					break;
-				}
-				case "cantakefort": {
-					cond = joinAnd(cond, new ConditionPlayerCanTakeFort(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "cantransform": {
-					cond = joinAnd(cond, new ConditionPlayerCanTransform(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "canuntransform": {
-					cond = joinAnd(cond, new ConditionPlayerCanUntransform(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "insidezoneid": {
+				case "callpc" -> cond = joinAnd(cond, new ConditionPlayerCallPc(Boolean.parseBoolean(a.getNodeValue())));
+				case "cancreatebase" -> cond = joinAnd(cond, new ConditionPlayerCanCreateBase(Boolean.parseBoolean(a.getNodeValue())));
+				case "cancreateoutpost" -> cond = joinAnd(cond, new ConditionPlayerCanCreateOutpost(Boolean.parseBoolean(a.getNodeValue())));
+				case "canescape" -> cond = joinAnd(cond, new ConditionPlayerCanEscape(Boolean.parseBoolean(a.getNodeValue())));
+				case "canrefuelairship" -> cond = joinAnd(cond, new ConditionPlayerCanRefuelAirship(Integer.parseInt(a.getNodeValue())));
+				case "canresurrect" -> cond = joinAnd(cond, new ConditionPlayerCanResurrect(Boolean.parseBoolean(a.getNodeValue())));
+				case "cansummon" -> cond = joinAnd(cond, new ConditionPlayerCanSummon(Boolean.parseBoolean(a.getNodeValue())));
+				case "cansummonsiegegolem" -> cond = joinAnd(cond, new ConditionPlayerCanSummonSiegeGolem(Boolean.parseBoolean(a.getNodeValue())));
+				case "cansweep" -> cond = joinAnd(cond, new ConditionPlayerCanSweep(Boolean.parseBoolean(a.getNodeValue())));
+				case "cantakecastle" -> cond = joinAnd(cond, new ConditionPlayerCanTakeCastle());
+				case "cantakefort" -> cond = joinAnd(cond, new ConditionPlayerCanTakeFort(Boolean.parseBoolean(a.getNodeValue())));
+				case "cantransform" -> cond = joinAnd(cond, new ConditionPlayerCanTransform(Boolean.parseBoolean(a.getNodeValue())));
+				case "canuntransform" -> cond = joinAnd(cond, new ConditionPlayerCanUntransform(Boolean.parseBoolean(a.getNodeValue())));
+				case "insidezoneid" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					List<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -735,9 +617,8 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionPlayerInsideZoneId(array));
-					break;
 				}
-				case "checkabnormal": {
+				case "checkabnormal" -> {
 					final String value = a.getNodeValue();
 					if (value.contains(",")) {
 						final String[] values = value.split(",");
@@ -745,17 +626,18 @@ public abstract class DocumentBase {
 					} else {
 						cond = joinAnd(cond, new ConditionPlayerCheckAbnormal(AbnormalType.valueOf(value)));
 					}
-					break;
 				}
-				case "categorytype": {
+				case "categorytype" -> {
 					final String[] values = a.getNodeValue().split(",");
 					final Set<CategoryType> array = new HashSet<>(values.length);
 					for (String value : values) {
 						array.add(CategoryType.valueOf(getValue(value, null)));
 					}
 					cond = joinAnd(cond, new ConditionCategoryType(array));
-					break;
 				}
+				case "hasagathion" -> cond = joinAnd(cond, new ConditionPlayerHasAgathion(Boolean.parseBoolean(a.getNodeValue())));
+				case "agathionenergy" -> cond = joinAnd(cond, new ConditionPlayerAgathionEnergy(Integer.decode(getValue(a.getNodeValue(), null))));
+				default -> _log.severe("Unrecognized <player> condition " + a.getNodeName().toLowerCase() + " in " + _file);
 			}
 		}
 		
@@ -771,40 +653,29 @@ public abstract class DocumentBase {
 		for (int i = 0; i < attrs.getLength(); i++) {
 			Node a = attrs.item(i);
 			switch (a.getNodeName().toLowerCase()) {
-				case "aggro": {
+				case "aggro" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionTargetAggro(val));
-					break;
 				}
-				case "siegezone": {
+				case "siegezone" -> {
 					int value = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionSiegeZone(value, false));
-					break;
 				}
-				case "level": {
+				case "level" -> {
 					int lvl = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionTargetLevel(lvl));
-					break;
 				}
-				case "levelrange": {
+				case "levelrange" -> {
 					String[] range = getValue(a.getNodeValue(), template).split(";");
 					if (range.length == 2) {
-						int[] lvlRange = new int[2];
-						lvlRange[0] = Integer.decode(getValue(a.getNodeValue(), template).split(";")[0]);
-						lvlRange[1] = Integer.decode(getValue(a.getNodeValue(), template).split(";")[1]);
-						cond = joinAnd(cond, new ConditionTargetLevelRange(lvlRange));
+						int minimumLevel = Integer.decode(getValue(a.getNodeValue(), template).split(";")[0]);
+						int maximumLevel = Integer.decode(getValue(a.getNodeValue(), template).split(";")[1]);
+						cond = joinAnd(cond, new ConditionTargetLevelRange(minimumLevel, maximumLevel));
 					}
-					break;
 				}
-				case "mypartyexceptme": {
-					cond = joinAnd(cond, new ConditionTargetMyPartyExceptMe(Boolean.parseBoolean(a.getNodeValue())));
-					break;
-				}
-				case "playable": {
-					cond = joinAnd(cond, new ConditionTargetPlayable());
-					break;
-				}
-				case "class_id_restriction": {
+				case "mypartyexceptme" -> cond = joinAnd(cond, new ConditionTargetMyPartyExceptMe(Boolean.parseBoolean(a.getNodeValue())));
+				case "playable" -> cond = joinAnd(cond, new ConditionTargetPlayable());
+				case "class_id_restriction" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					List<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -812,47 +683,37 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionTargetClassIdRestriction(array));
-					break;
 				}
-				case "active_effect_id": {
-					int effect_id = Integer.decode(getValue(a.getNodeValue(), template));
-					cond = joinAnd(cond, new ConditionTargetActiveEffectId(effect_id));
-					break;
+				case "active_effect_id" -> {
+					int effectId = Integer.decode(getValue(a.getNodeValue(), template));
+					cond = joinAnd(cond, new ConditionTargetActiveEffectId(effectId));
 				}
-				case "active_effect_id_lvl": {
+				case "active_effect_id_lvl" -> {
 					String val = getValue(a.getNodeValue(), template);
 					int effect_id = Integer.decode(getValue(val.split(",")[0], template));
 					int effect_lvl = Integer.decode(getValue(val.split(",")[1], template));
 					cond = joinAnd(cond, new ConditionTargetActiveEffectId(effect_id, effect_lvl));
-					break;
 				}
-				case "active_skill_id": {
+				case "active_skill_id" -> {
 					int skill_id = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionTargetActiveSkillId(skill_id));
-					break;
 				}
-				case "active_skill_id_lvl": {
+				case "active_skill_id_lvl" -> {
 					String val = getValue(a.getNodeValue(), template);
 					int skill_id = Integer.decode(getValue(val.split(",")[0], template));
 					int skill_lvl = Integer.decode(getValue(val.split(",")[1], template));
 					cond = joinAnd(cond, new ConditionTargetActiveSkillId(skill_id, skill_lvl));
-					break;
 				}
-				case "abnormal": {
+				case "abnormal" -> {
 					int abnormalId = Integer.decode(getValue(a.getNodeValue(), template));
 					cond = joinAnd(cond, new ConditionTargetAbnormal(abnormalId));
-					break;
 				}
-				case "mindistance": {
+				case "mindistance" -> {
 					int distance = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionMinDistance(distance * distance));
-					break;
 				}
-				case "race": {
-					cond = joinAnd(cond, new ConditionTargetRace(Race.valueOf(a.getNodeValue())));
-					break;
-				}
-				case "using": {
+				case "race" -> cond = joinAnd(cond, new ConditionTargetRace(Race.valueOf(a.getNodeValue())));
+				case "using" -> {
 					int mask = 0;
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					while (st.hasMoreTokens()) {
@@ -871,9 +732,8 @@ public abstract class DocumentBase {
 						}
 					}
 					cond = joinAnd(cond, new ConditionTargetUsesWeaponKind(mask));
-					break;
 				}
-				case "npcid": {
+				case "npcid" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					List<Integer> array = new ArrayList<>(st.countTokens());
 					while (st.hasMoreTokens()) {
@@ -881,32 +741,23 @@ public abstract class DocumentBase {
 						array.add(Integer.decode(getValue(item, null)));
 					}
 					cond = joinAnd(cond, new ConditionTargetNpcId(array));
-					break;
 				}
-				case "npctype": {
+				case "npctype" -> {
 					String values = getValue(a.getNodeValue(), template).trim();
 					String[] valuesSplit = values.split(",");
 					InstanceType[] types = new InstanceType[valuesSplit.length];
-					InstanceType type;
 					for (int j = 0; j < valuesSplit.length; j++) {
-						type = Enum.valueOf(InstanceType.class, valuesSplit[j]);
-						if (type == null) {
-							throw new IllegalArgumentException("Instance type not recognized: " + valuesSplit[j]);
-						}
-						types[j] = type;
+						types[j] = Enum.valueOf(InstanceType.class, valuesSplit[j]);
 					}
 					cond = joinAnd(cond, new ConditionTargetNpcType(types));
-					break;
 				}
-				case "weight": {
+				case "weight" -> {
 					int weight = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionTargetWeight(weight));
-					break;
 				}
-				case "invsize": {
+				case "invsize" -> {
 					int size = Integer.decode(getValue(a.getNodeValue(), null));
 					cond = joinAnd(cond, new ConditionTargetInvSize(size));
-					break;
 				}
 			}
 		}
@@ -923,7 +774,7 @@ public abstract class DocumentBase {
 		for (int i = 0; i < attrs.getLength(); i++) {
 			Node a = attrs.item(i);
 			switch (a.getNodeName().toLowerCase()) {
-				case "kind": {
+				case "kind" -> {
 					int mask = 0;
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					while (st.hasMoreTokens()) {
@@ -946,9 +797,8 @@ public abstract class DocumentBase {
 						}
 					}
 					cond = joinAnd(cond, new ConditionUsingItemType(mask));
-					break;
 				}
-				case "slot": {
+				case "slot" -> {
 					int mask = 0;
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
 					while (st.hasMoreTokens()) {
@@ -963,14 +813,12 @@ public abstract class DocumentBase {
 						}
 					}
 					cond = joinAnd(cond, new ConditionUsingSlotType(mask));
-					break;
 				}
-				case "skill": {
+				case "skill" -> {
 					int id = Integer.parseInt(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionUsingSkill(id));
-					break;
 				}
-				case "slotitem": {
+				case "slotitem" -> {
 					StringTokenizer st = new StringTokenizer(a.getNodeValue(), ";");
 					int id = Integer.parseInt(st.nextToken().trim());
 					int slot = Integer.parseInt(st.nextToken().trim());
@@ -979,12 +827,10 @@ public abstract class DocumentBase {
 						enchant = Integer.parseInt(st.nextToken().trim());
 					}
 					cond = joinAnd(cond, new ConditionSlotItemId(slot, id, enchant));
-					break;
 				}
-				case "weaponchange": {
+				case "weaponchange" -> {
 					boolean val = Boolean.parseBoolean(a.getNodeValue());
 					cond = joinAnd(cond, new ConditionChangeWeapon(val));
-					break;
 				}
 			}
 		}
@@ -1054,7 +900,7 @@ public abstract class DocumentBase {
 			if (template instanceof Skill) {
 				return getTableValue(value);
 			} else if (template instanceof Integer) {
-				return getTableValue(value, ((Integer) template).intValue());
+				return getTableValue(value, (Integer) template);
 			} else {
 				throw new IllegalStateException();
 			}

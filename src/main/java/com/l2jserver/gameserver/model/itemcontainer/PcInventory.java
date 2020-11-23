@@ -676,7 +676,7 @@ public class PcInventory extends Inventory {
 	public static int[][] restoreVisibleInventory(int objectId) {
 		int[][] paperdoll = new int[31][3];
 		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("SELECT object_id,item_id,loc_data,enchant_level FROM items WHERE owner_id=? AND loc='PAPERDOLL'")) {
+			var ps = con.prepareStatement("SELECT object_id, item_id, loc_data, enchant_level FROM items WHERE owner_id=? AND loc='PAPERDOLL'")) {
 			ps.setInt(1, objectId);
 			try (var rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -837,10 +837,7 @@ public class PcInventory extends Inventory {
 	 * @return true if can use
 	 */
 	public boolean canManipulateWithItemId(int itemId) {
-		if (((_blockMode == 0) && Util.contains(_blockItems, itemId)) || ((_blockMode == 1) && !Util.contains(_blockItems, itemId))) {
-			return false;
-		}
-		return true;
+		return ((_blockMode != 0) || !Util.contains(_blockItems, itemId)) && ((_blockMode != 1) || Util.contains(_blockItems, itemId));
 	}
 	
 	@Override

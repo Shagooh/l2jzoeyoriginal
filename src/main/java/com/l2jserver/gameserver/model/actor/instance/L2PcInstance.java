@@ -72,6 +72,7 @@ import com.l2jserver.gameserver.RecipeController;
 import com.l2jserver.gameserver.SevenSigns;
 import com.l2jserver.gameserver.SevenSignsFestival;
 import com.l2jserver.gameserver.ThreadPoolManager;
+import com.l2jserver.gameserver.agathion.repository.AgathionRepository;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.ai.L2CharacterAI;
 import com.l2jserver.gameserver.ai.L2PlayerAI;
@@ -277,6 +278,7 @@ import com.l2jserver.gameserver.network.serverpackets.CharInfo;
 import com.l2jserver.gameserver.network.serverpackets.ConfirmDlg;
 import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
 import com.l2jserver.gameserver.network.serverpackets.ExAutoSoulShot;
+import com.l2jserver.gameserver.network.serverpackets.ExBR_AgathionEnergyInfo;
 import com.l2jserver.gameserver.network.serverpackets.ExBrExtraUserInfo;
 import com.l2jserver.gameserver.network.serverpackets.ExDominionWarStart;
 import com.l2jserver.gameserver.network.serverpackets.ExDuelUpdateUserInfo;
@@ -900,33 +902,15 @@ public final class L2PcInstance extends L2Playable {
 					continue;
 				}
 				switch (i) {
-					case 0:
-						result |= RelationChanged.RELATION_PARTYLEADER; // 0x10
-						break;
-					case 1:
-						result |= RelationChanged.RELATION_PARTY4; // 0x8
-						break;
-					case 2:
-						result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY2 + RelationChanged.RELATION_PARTY1; // 0x7
-						break;
-					case 3:
-						result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY2; // 0x6
-						break;
-					case 4:
-						result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY1; // 0x5
-						break;
-					case 5:
-						result |= RelationChanged.RELATION_PARTY3; // 0x4
-						break;
-					case 6:
-						result |= RelationChanged.RELATION_PARTY2 + RelationChanged.RELATION_PARTY1; // 0x3
-						break;
-					case 7:
-						result |= RelationChanged.RELATION_PARTY2; // 0x2
-						break;
-					case 8:
-						result |= RelationChanged.RELATION_PARTY1; // 0x1
-						break;
+					case 0 -> result |= RelationChanged.RELATION_PARTYLEADER; // 0x10
+					case 1 -> result |= RelationChanged.RELATION_PARTY4; // 0x8
+					case 2 -> result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY2 + RelationChanged.RELATION_PARTY1; // 0x7
+					case 3 -> result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY2; // 0x6
+					case 4 -> result |= RelationChanged.RELATION_PARTY3 + RelationChanged.RELATION_PARTY1; // 0x5
+					case 5 -> result |= RelationChanged.RELATION_PARTY3; // 0x4
+					case 6 -> result |= RelationChanged.RELATION_PARTY2 + RelationChanged.RELATION_PARTY1; // 0x3
+					case 7 -> result |= RelationChanged.RELATION_PARTY2; // 0x2
+					case 8 -> result |= RelationChanged.RELATION_PARTY1; // 0x1
 				}
 			}
 		}
@@ -1121,8 +1105,8 @@ public final class L2PcInstance extends L2Playable {
 	public void logout(boolean closeClient) {
 		try {
 			closeNetConnection(closeClient);
-		} catch (Exception e) {
-			LOG.warn("Exception on logout(): {}", e);
+		} catch (Exception ex) {
+			LOG.warn("Error trying to logout!", ex);
 		}
 	}
 	
@@ -1495,49 +1479,49 @@ public final class L2PcInstance extends L2Playable {
 		}
 		
 		if (isInsideZone(ZoneId.ALTERED)) {
-			if (_lastCompassZone == ExSetCompassZoneCode.ALTEREDZONE) {
+			if (_lastCompassZone == ExSetCompassZoneCode.ALTERED_ZONE) {
 				return;
 			}
-			_lastCompassZone = ExSetCompassZoneCode.ALTEREDZONE;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.ALTEREDZONE);
+			_lastCompassZone = ExSetCompassZoneCode.ALTERED_ZONE;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.ALTERED_ZONE);
 			sendPacket(cz);
 		} else if (isInsideZone(ZoneId.SIEGE)) {
-			if (_lastCompassZone == ExSetCompassZoneCode.SIEGEWARZONE2) {
+			if (_lastCompassZone == ExSetCompassZoneCode.SIEGE_WAR_ZONE_2) {
 				return;
 			}
-			_lastCompassZone = ExSetCompassZoneCode.SIEGEWARZONE2;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.SIEGEWARZONE2);
+			_lastCompassZone = ExSetCompassZoneCode.SIEGE_WAR_ZONE_2;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.SIEGE_WAR_ZONE_2);
 			sendPacket(cz);
 		} else if (isInsideZone(ZoneId.PVP)) {
-			if (_lastCompassZone == ExSetCompassZoneCode.PVPZONE) {
+			if (_lastCompassZone == ExSetCompassZoneCode.PVP_ZONE) {
 				return;
 			}
-			_lastCompassZone = ExSetCompassZoneCode.PVPZONE;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.PVPZONE);
+			_lastCompassZone = ExSetCompassZoneCode.PVP_ZONE;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.PVP_ZONE);
 			sendPacket(cz);
 		} else if (isIn7sDungeon()) {
-			if (_lastCompassZone == ExSetCompassZoneCode.SEVENSIGNSZONE) {
+			if (_lastCompassZone == ExSetCompassZoneCode.SEVEN_SIGNS_ZONE) {
 				return;
 			}
-			_lastCompassZone = ExSetCompassZoneCode.SEVENSIGNSZONE;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.SEVENSIGNSZONE);
+			_lastCompassZone = ExSetCompassZoneCode.SEVEN_SIGNS_ZONE;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.SEVEN_SIGNS_ZONE);
 			sendPacket(cz);
 		} else if (isInsideZone(ZoneId.PEACE)) {
-			if (_lastCompassZone == ExSetCompassZoneCode.PEACEZONE) {
+			if (_lastCompassZone == ExSetCompassZoneCode.PEACE_ZONE) {
 				return;
 			}
-			_lastCompassZone = ExSetCompassZoneCode.PEACEZONE;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.PEACEZONE);
+			_lastCompassZone = ExSetCompassZoneCode.PEACE_ZONE;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.PEACE_ZONE);
 			sendPacket(cz);
 		} else {
-			if (_lastCompassZone == ExSetCompassZoneCode.GENERALZONE) {
+			if (_lastCompassZone == ExSetCompassZoneCode.GENERAL_ZONE) {
 				return;
 			}
-			if (_lastCompassZone == ExSetCompassZoneCode.SIEGEWARZONE2) {
+			if (_lastCompassZone == ExSetCompassZoneCode.SIEGE_WAR_ZONE_2) {
 				updatePvPStatus();
 			}
-			_lastCompassZone = ExSetCompassZoneCode.GENERALZONE;
-			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.GENERALZONE);
+			_lastCompassZone = ExSetCompassZoneCode.GENERAL_ZONE;
+			ExSetCompassZoneCode cz = new ExSetCompassZoneCode(ExSetCompassZoneCode.GENERAL_ZONE);
 			sendPacket(cz);
 		}
 	}
@@ -1890,6 +1874,12 @@ public final class L2PcInstance extends L2Playable {
 			sendPacket(new ExStorageMaxCount(this));
 		}
 		
+		// If item is agathion with energy, then send info to client.
+		final var agathionInfo = AgathionRepository.getInstance().getByItemId(item.getId());
+		if ((agathionInfo != null) && agathionInfo.getMaxEnergy() > 0) {
+			sendPacket(new ExBR_AgathionEnergyInfo(List.of(item)));
+		}
+		
 		// Notify to scripts
 		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerEquipItem(this, item), this);
 	}
@@ -2095,7 +2085,7 @@ public final class L2PcInstance extends L2Playable {
 		// Synchronize level with pet if possible.
 		if (hasPet()) {
 			final L2PetInstance pet = (L2PetInstance) getSummon();
-			if (pet.getPetData().isSynchLevel() && (pet.getLevel() != getLevel())) {
+			if (pet.getPetData().isSyncLevel() && (pet.getLevel() != getLevel())) {
 				pet.getStat().setLevel(getLevel());
 				pet.getStat().getExpForLevel(getLevel());
 				pet.setCurrentHp(pet.getMaxHp());
@@ -2796,7 +2786,7 @@ public final class L2PcInstance extends L2Playable {
 			sendPacket(su);
 			
 			// If over capacity, drop the item
-			if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && newitem.isDropable() && (!newitem.isStackable() || (newitem.getLastChange() != L2ItemInstance.MODIFIED))) {
+			if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && newitem.isDroppable() && (!newitem.isStackable() || (newitem.getLastChange() != L2ItemInstance.MODIFIED))) {
 				dropItem("InvDrop", newitem, null, true, true);
 			} else if (CursedWeaponsManager.getInstance().isCursed(newitem.getId())) {
 				CursedWeaponsManager.getInstance().activate(this, newitem);
@@ -2901,7 +2891,7 @@ public final class L2PcInstance extends L2Playable {
 				L2ItemInstance createdItem = _inventory.addItem(process, itemId, count, enchantLevel, this, reference);
 				
 				// If over capacity, drop the item
-				if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && createdItem.isDropable() && (!createdItem.isStackable() || (createdItem.getLastChange() != L2ItemInstance.MODIFIED))) {
+				if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && createdItem.isDroppable() && (!createdItem.isStackable() || (createdItem.getLastChange() != L2ItemInstance.MODIFIED))) {
 					dropItem("InvDrop", createdItem, null, true);
 				} else if (CursedWeaponsManager.getInstance().isCursed(createdItem.getId())) {
 					CursedWeaponsManager.getInstance().activate(this, createdItem);
@@ -3616,7 +3606,7 @@ public final class L2PcInstance extends L2Playable {
 		
 		// In duel MP updated only with CP or HP
 		if (isInDuel() && (needCpUpdate || needHpUpdate)) {
-			DuelManager.getInstance().broadcastToOppositTeam(this, new ExDuelUpdateUserInfo(this));
+			DuelManager.getInstance().broadcastToOpposingTeam(this, new ExDuelUpdateUserInfo(this));
 		}
 	}
 	
@@ -3893,7 +3883,7 @@ public final class L2PcInstance extends L2Playable {
 				}
 			}
 			
-			if ((target.getItemLootShedule() != null) && ((target.getOwnerId() == getObjectId()) || isInLooterParty(target.getOwnerId()))) {
+			if ((target.getItemLootSchedule() != null) && ((target.getOwnerId() == getObjectId()) || isInLooterParty(target.getOwnerId()))) {
 				target.resetOwnerTimer();
 			}
 			
@@ -4548,8 +4538,8 @@ public final class L2PcInstance extends L2Playable {
 					// Control Item of active pet
 					// Item listed in the non droppable item list
 					// Item listed in the non droppable pet item list
-					if (itemDrop.isShadowItem() || itemDrop.isTimeLimitedItem() || !itemDrop.isDropable() || (itemDrop.getId() == Inventory.ADENA_ID) || //
-						(itemDrop.getItem().getType2() == ItemType2.QUEST) || (hasSummon() && (getSummon().getControlObjectId() == itemDrop.getId())) || //
+					if (itemDrop.isShadowItem() || itemDrop.isTimeLimitedItem() || !itemDrop.isDroppable() || (itemDrop.getId() == Inventory.ADENA_ID) || //
+						(itemDrop.getItem().getType2() == ItemType2.QUEST) || (hasSummon() && (getSummon().getControlObjectId() == itemDrop.getObjectId())) || //
 						pvp().getNonDroppableItems().contains(itemDrop.getId()) || pvp().getPetItems().contains(itemDrop.getId())) {
 						continue;
 					}
@@ -6382,25 +6372,12 @@ public final class L2PcInstance extends L2Playable {
 		}
 		
 		// Check if the target is correct and Notify the AI with AI_INTENTION_CAST and target
-		L2Object target = null;
-		switch (skill.getTargetType()) {
-			case AURA: // AURA, SELF should be cast even if no target has been found
-			case FRONT_AURA:
-			case BEHIND_AURA:
-			case GROUND:
-			case SELF:
-			case AURA_CORPSE_MOB:
-			case COMMAND_CHANNEL:
-			case AURA_FRIENDLY:
-			case AURA_UNDEAD_ENEMY:
-				target = this;
-				break;
-			default:
-				
-				// Get the first target of the list
-				target = skill.getFirstOfTargetList(this);
-				break;
-		}
+		L2Object target = switch (skill.getTargetType()) {
+			// AURA, SELF should be cast even if no target has been found
+			case AURA, FRONT_AURA, BEHIND_AURA, GROUND, SELF, AURA_CORPSE_MOB, COMMAND_CHANNEL, AURA_FRIENDLY, AURA_UNDEAD_ENEMY -> this;
+			// Get the first target of the list
+			default -> skill.getFirstOfTargetList(this);
+		};
 		
 		// Notify the AI with AI_INTENTION_CAST and target
 		getAI().setIntention(CtrlIntention.AI_INTENTION_CAST, skill, target);
@@ -6473,32 +6450,12 @@ public final class L2PcInstance extends L2Playable {
 			return false;
 		}
 		
-		switch (sklTargetType) {
-			// Target the player if skill type is AURA, PARTY, CLAN or SELF
-			case AURA:
-			case FRONT_AURA:
-			case BEHIND_AURA:
-			case PARTY:
-			case CLAN:
-			case PARTY_CLAN:
-			case GROUND:
-			case SELF:
-			case AREA_SUMMON:
-			case AURA_CORPSE_MOB:
-			case COMMAND_CHANNEL:
-			case AURA_FRIENDLY:
-			case AURA_UNDEAD_ENEMY:
-				target = this;
-				break;
-			case PET:
-			case SERVITOR:
-			case SUMMON:
-				target = getSummon();
-				break;
-			default:
-				target = getTarget();
-				break;
-		}
+		// Target the player if skill type is AURA, PARTY, CLAN or SELF
+		target = switch (sklTargetType) {
+			case AURA, FRONT_AURA, BEHIND_AURA, PARTY, CLAN, PARTY_CLAN, GROUND, SELF, AREA_SUMMON, AURA_CORPSE_MOB, COMMAND_CHANNEL, AURA_FRIENDLY, AURA_UNDEAD_ENEMY -> this;
+			case PET, SERVITOR, SUMMON -> getSummon();
+			default -> getTarget();
+		};
 		
 		// Check the validity of the target
 		if (target == null) {
@@ -6876,23 +6833,13 @@ public final class L2PcInstance extends L2Playable {
 	public void setMount(int npcId, int npcLevel) {
 		final MountType type = MountType.findByNpcId(npcId);
 		switch (type) {
-			case NONE: // None
-			{
-				setIsFlying(false);
-				break;
-			}
-			case STRIDER: // Strider
-			{
+			case NONE -> setIsFlying(false);
+			case STRIDER -> {
 				if (isNoble()) {
 					addSkill(CommonSkill.STRIDER_SIEGE_ASSAULT.getSkill(), false);
 				}
-				break;
 			}
-			case WYVERN: // Wyvern
-			{
-				setIsFlying(true);
-				break;
-			}
+			case WYVERN -> setIsFlying(true);
 		}
 		
 		_mountType = type;
@@ -8052,7 +7999,7 @@ public final class L2PcInstance extends L2Playable {
 		}
 		if (isInParty() && getParty().isInDimensionalRift()) {
 			if (!DimensionalRiftManager.getInstance().checkIfInPeaceZone(getX(), getY(), getZ())) {
-				getParty().getDimensionalRift().memberRessurected(this);
+				getParty().getDimensionalRift().memberResurrected(this);
 			}
 		}
 		if (getInstanceId() > 0) {
@@ -9592,16 +9539,10 @@ public final class L2PcInstance extends L2Playable {
 		sendPacket(sm);
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getAgathionId() {
 		return _agathionId;
 	}
 	
-	/**
-	 * @param npcId
-	 */
 	public void setAgathionId(int npcId) {
 		_agathionId = npcId;
 	}
@@ -9610,9 +9551,6 @@ public final class L2PcInstance extends L2Playable {
 		return getStat().getVitalityPoints();
 	}
 	
-	/**
-	 * @return Vitality Level
-	 */
 	public int getVitalityLevel() {
 		return getStat().getVitalityLevel();
 	}
@@ -10057,18 +9995,10 @@ public final class L2PcInstance extends L2Playable {
 		}
 		
 		switch (getPrivateStoreType()) {
-			case SELL:
-				activeChar.sendPacket(new PrivateStoreMsgSell(this));
-				break;
-			case PACKAGE_SELL:
-				activeChar.sendPacket(new ExPrivateStoreSetWholeMsg(this));
-				break;
-			case BUY:
-				activeChar.sendPacket(new PrivateStoreMsgBuy(this));
-				break;
-			case MANUFACTURE:
-				activeChar.sendPacket(new RecipeShopMsg(this));
-				break;
+			case SELL -> activeChar.sendPacket(new PrivateStoreMsgSell(this));
+			case PACKAGE_SELL -> activeChar.sendPacket(new ExPrivateStoreSetWholeMsg(this));
+			case BUY -> activeChar.sendPacket(new PrivateStoreMsgBuy(this));
+			case MANUFACTURE -> activeChar.sendPacket(new RecipeShopMsg(this));
 		}
 		if (isTransformed()) {
 			// Required double send for fix Mounted H5+

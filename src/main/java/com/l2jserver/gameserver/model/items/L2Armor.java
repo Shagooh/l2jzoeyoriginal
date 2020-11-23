@@ -34,6 +34,7 @@ public final class L2Armor extends L2Item {
 	 * Skill that activates when armor is enchanted +4.
 	 */
 	private SkillHolder _enchant4Skill = null;
+	
 	private ArmorType _type;
 	
 	/**
@@ -60,7 +61,7 @@ public final class L2Armor extends L2Item {
 		if (skill != null) {
 			String[] info = skill.split("-");
 			
-			if ((info != null) && (info.length == 2)) {
+			if (info.length == 2) {
 				int id = 0;
 				int level = 0;
 				try {
@@ -68,7 +69,7 @@ public final class L2Armor extends L2Item {
 					level = Integer.parseInt(info[1]);
 				} catch (Exception nfe) {
 					// Incorrect syntax, don't add new skill
-					_log.info(StringUtil.concat("> Couldnt parse ", skill, " in armor enchant skills! item ", toString()));
+					_log.info(StringUtil.concat("> Couldn't parse ", skill, " in armor enchant skills! item ", toString()));
 				}
 				if ((id > 0) && (level > 0)) {
 					_enchant4Skill = new SkillHolder(id, level);
@@ -77,25 +78,16 @@ public final class L2Armor extends L2Item {
 		}
 	}
 	
-	/**
-	 * @return the type of the armor.
-	 */
 	@Override
 	public ArmorType getItemType() {
 		return _type;
 	}
 	
-	/**
-	 * @return the ID of the item after applying the mask.
-	 */
 	@Override
 	public int getItemMask() {
 		return getItemType().mask();
 	}
 	
-	/**
-	 * @return skill that player get when has equipped armor +4 or more
-	 */
 	@Override
 	public Skill getEnchant4Skill() {
 		if (_enchant4Skill == null) {

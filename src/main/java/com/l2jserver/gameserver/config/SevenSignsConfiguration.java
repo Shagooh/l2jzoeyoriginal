@@ -20,22 +20,26 @@ package com.l2jserver.gameserver.config;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Reloadable;
 
 /**
- * Seven Sings Configuration.
+ * Seven Signs Configuration.
  * @author Zoey76
  * @version 2.6.1.0
  */
 @Sources({
-	"file:./config/sevensings.properties",
-	"classpath:config/sevensings.properties"
+	"file:${L2J_HOME}/custom/game/config/sevensigns.properties",
+	"file:./config/sevensigns.properties",
+	"classpath:config/sevensigns.properties"
 })
+@LoadPolicy(MERGE)
 @HotReload(value = 20, unit = MINUTES, type = ASYNC)
-public interface SevenSingsConfiguration extends Reloadable {
+public interface SevenSignsConfiguration extends Reloadable {
 	
 	@Key("RequireClanCastle")
 	Boolean requireClanCastle();

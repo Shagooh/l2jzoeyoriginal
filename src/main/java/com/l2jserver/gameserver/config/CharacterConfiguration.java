@@ -20,6 +20,7 @@ package com.l2jserver.gameserver.config;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Reloadable;
 
@@ -42,9 +44,11 @@ import com.l2jserver.gameserver.config.converter.Seconds2MillisecondsConverter;
  * @version 2.6.1.0
  */
 @Sources({
+	"file:${L2J_HOME}/custom/game/config/character.properties",
 	"file:./config/character.properties",
 	"classpath:config/character.properties"
 })
+@LoadPolicy(MERGE)
 @HotReload(value = 5, unit = MINUTES, type = ASYNC)
 public interface CharacterConfiguration extends Reloadable {
 	
@@ -302,6 +306,12 @@ public interface CharacterConfiguration extends Reloadable {
 	@Key("NpcTalkBlockingTime")
 	Integer getNpcTalkBlockingTime();
 	
+	@Key("FriendListLimit")
+	Integer getFriendListLimit();
+	
+	@Key("BlockListLimit")
+	Integer getBlockListLimit();
+	
 	// Enchanting
 	
 	@Key("EnchantChanceElementStone")
@@ -404,15 +414,15 @@ public interface CharacterConfiguration extends Reloadable {
 	@ConverterClass(Seconds2MillisecondsConverter.class)
 	Integer getFortressZoneFameTaskFrequency();
 	
-	@Key("FortressZoneFameAquirePoints")
-	Integer getFortressZoneFameAquirePoints();
+	@Key("FortressZoneFameAcquirePoints")
+	Integer getFortressZoneFameAcquirePoints();
 	
 	@Key("CastleZoneFameTaskFrequency")
 	@ConverterClass(Seconds2MillisecondsConverter.class)
 	Integer getCastleZoneFameTaskFrequency();
 	
-	@Key("CastleZoneFameAquirePoints")
-	Integer getCastleZoneFameAquirePoints();
+	@Key("CastleZoneFameAcquirePoints")
+	Integer getCastleZoneFameAcquirePoints();
 	
 	@Key("FameForDeadPlayers")
 	Boolean fameForDeadPlayers();

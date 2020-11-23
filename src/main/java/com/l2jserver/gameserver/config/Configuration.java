@@ -55,7 +55,7 @@ public class Configuration {
 	
 	private static final FortressConfiguration fortress = ConfigFactory.create(FortressConfiguration.class);
 	
-	private static final SevenSingsConfiguration sevenSings = ConfigFactory.create(SevenSingsConfiguration.class);
+	private static final SevenSignsConfiguration sevenSigns = ConfigFactory.create(SevenSignsConfiguration.class);
 	
 	private static final TvTConfiguration tvt = ConfigFactory.create(TvTConfiguration.class);
 	
@@ -83,6 +83,10 @@ public class Configuration {
 	
 	private static final FloodProtectorConfiguration floodProtector = ConfigFactory.create(FloodProtectorConfiguration.class);
 	
+	private static final BufferServiceConfiguration bufferService = ConfigFactory.create(BufferServiceConfiguration.class);
+
+	private static final DiscordConfiguration discord = ConfigFactory.create(DiscordConfiguration.class);
+
 	private Configuration() {
 		// Do nothing.
 	}
@@ -135,8 +139,8 @@ public class Configuration {
 		return fortress;
 	}
 	
-	public static SevenSingsConfiguration sevenSings() {
-		return sevenSings;
+	public static SevenSignsConfiguration sevenSigns() {
+		return sevenSigns;
 	}
 	
 	public static TvTConfiguration tvt() {
@@ -193,5 +197,13 @@ public class Configuration {
 	
 	public static IPConfigData ip() {
 		return ipConfigData;
+	}
+	
+	public static BufferServiceConfiguration bufferService() {
+		return bufferService;
+	}
+
+	public static DiscordConfiguration discord() {
+		return discord;
 	}
 }

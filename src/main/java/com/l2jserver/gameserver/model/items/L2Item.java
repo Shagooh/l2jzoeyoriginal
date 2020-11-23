@@ -55,7 +55,7 @@ import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.StringUtil;
 
 /**
- * This class contains all informations concerning the item (weapon, armor, etc).<BR>
+ * This class contains all information concerning the item (weapon, armor, etc).<BR>
  * Mother class of :
  * <ul>
  * <li>L2Armor</li>
@@ -117,7 +117,7 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	private final int _referencePrice;
 	private final int _crystalCount;
 	private final boolean _sellable;
-	private final boolean _dropable;
+	private final boolean _droppable;
 	private final boolean _destroyable;
 	private final boolean _tradeable;
 	private final boolean _depositable;
@@ -171,7 +171,7 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 		
 		_stackable = set.getBoolean("is_stackable", false);
 		_sellable = set.getBoolean("is_sellable", true);
-		_dropable = set.getBoolean("is_dropable", true);
+		_droppable = set.getBoolean("is_droppable", true);
 		_destroyable = set.getBoolean("is_destroyable", true);
 		_tradeable = set.getBoolean("is_tradable", true);
 		_depositable = set.getBoolean("is_depositable", true);
@@ -232,7 +232,7 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 		skills = set.getString("unequip_skill", null);
 		if (skills != null) {
 			String[] info = skills.split("-");
-			if ((info != null) && (info.length == 2)) {
+			if (info.length == 2) {
 				int id = 0;
 				int level = 0;
 				try {
@@ -240,7 +240,7 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 					level = Integer.parseInt(info[1]);
 				} catch (Exception nfe) {
 					// Incorrect syntax, don't add new skill
-					_log.info(StringUtil.concat("Couldnt parse ", skills, " in weapon unequip skills! item ", toString()));
+					_log.info(StringUtil.concat("Couldn't parse ", skills, " in weapon unequip skills! item ", toString()));
 				}
 				if ((id > 0) && (level > 0)) {
 					_unequipSkill = new SkillHolder(id, level);
@@ -315,6 +315,9 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 		return _displayId;
 	}
 	
+	/**
+	 * @return the ID of the item after applying the mask
+	 */
 	public abstract int getItemMask();
 	
 	/**
@@ -381,13 +384,10 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	 * @return the grade of the item.
 	 */
 	public final CrystalType getItemGradeSPlus() {
-		switch (getItemGrade()) {
-			case S80:
-			case S84:
-				return CrystalType.S;
-			default:
-				return getItemGrade();
-		}
+		return switch (getItemGrade()) {
+			case S80, S84 -> CrystalType.S;
+			default -> getItemGrade();
+		};
 	}
 	
 	/**
@@ -403,33 +403,22 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	 */
 	public final int getCrystalCount(int enchantLevel) {
 		if (enchantLevel > 3) {
-			switch (_type2) {
-				case SHIELD_ARMOR:
-				case ACCESSORY:
-					return _crystalCount + (getCrystalType().getCrystalEnchantBonusArmor() * ((3 * enchantLevel) - 6));
-				case WEAPON:
-					return _crystalCount + (getCrystalType().getCrystalEnchantBonusWeapon() * ((2 * enchantLevel) - 3));
-				default:
-					return _crystalCount;
-			}
+			return switch (_type2) {
+				case SHIELD_ARMOR, ACCESSORY -> _crystalCount + (getCrystalType().getCrystalEnchantBonusArmor() * ((3 * enchantLevel) - 6));
+				case WEAPON -> _crystalCount + (getCrystalType().getCrystalEnchantBonusWeapon() * ((2 * enchantLevel) - 3));
+				default -> _crystalCount;
+			};
 		} else if (enchantLevel > 0) {
-			switch (_type2) {
-				case SHIELD_ARMOR:
-				case ACCESSORY:
-					return _crystalCount + (getCrystalType().getCrystalEnchantBonusArmor() * enchantLevel);
-				case WEAPON:
-					return _crystalCount + (getCrystalType().getCrystalEnchantBonusWeapon() * enchantLevel);
-				default:
-					return _crystalCount;
-			}
+			return switch (_type2) {
+				case SHIELD_ARMOR, ACCESSORY -> _crystalCount + (getCrystalType().getCrystalEnchantBonusArmor() * enchantLevel);
+				case WEAPON -> _crystalCount + (getCrystalType().getCrystalEnchantBonusWeapon() * enchantLevel);
+				default -> _crystalCount;
+			};
 		} else {
 			return _crystalCount;
 		}
 	}
 	
-	/**
-	 * @return the name of the item.
-	 */
 	public final String getName() {
 		return _name;
 	}
@@ -517,8 +506,8 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	/**
 	 * @return {@code true} if the item can be dropped, {@code false} otherwise.
 	 */
-	public final boolean isDropable() {
-		return _dropable;
+	public final boolean isDroppable() {
+		return _droppable;
 	}
 	
 	/**
@@ -601,7 +590,7 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	 */
 	public final List<AbstractFunction> getStatFuncs(L2ItemInstance item, L2Character player) {
 		if ((_funcTemplates == null) || _funcTemplates.isEmpty()) {
-			return Collections.<AbstractFunction> emptyList();
+			return Collections.emptyList();
 		}
 		
 		final List<AbstractFunction> funcs = new ArrayList<>(_funcTemplates.size());
@@ -620,30 +609,12 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 	 */
 	public void attach(FuncTemplate f) {
 		switch (f.getStat()) {
-			case FIRE_RES:
-			case FIRE_POWER:
-				setElementals(new Elementals(Elementals.FIRE, (int) f.getValue()));
-				break;
-			case WATER_RES:
-			case WATER_POWER:
-				setElementals(new Elementals(Elementals.WATER, (int) f.getValue()));
-				break;
-			case WIND_RES:
-			case WIND_POWER:
-				setElementals(new Elementals(Elementals.WIND, (int) f.getValue()));
-				break;
-			case EARTH_RES:
-			case EARTH_POWER:
-				setElementals(new Elementals(Elementals.EARTH, (int) f.getValue()));
-				break;
-			case HOLY_RES:
-			case HOLY_POWER:
-				setElementals(new Elementals(Elementals.HOLY, (int) f.getValue()));
-				break;
-			case DARK_RES:
-			case DARK_POWER:
-				setElementals(new Elementals(Elementals.DARK, (int) f.getValue()));
-				break;
+			case FIRE_RES, FIRE_POWER -> setElementals(new Elementals(Elementals.FIRE, (int) f.getValue()));
+			case WATER_RES, WATER_POWER -> setElementals(new Elementals(Elementals.WATER, (int) f.getValue()));
+			case WIND_RES, WIND_POWER -> setElementals(new Elementals(Elementals.WIND, (int) f.getValue()));
+			case EARTH_RES, EARTH_POWER -> setElementals(new Elementals(Elementals.EARTH, (int) f.getValue()));
+			case HOLY_RES, HOLY_POWER -> setElementals(new Elementals(Elementals.HOLY, (int) f.getValue()));
+			case DARK_RES, DARK_POWER -> setElementals(new Elementals(Elementals.DARK, (int) f.getValue()));
 		}
 		
 		if (_funcTemplates == null) {
@@ -824,6 +795,9 @@ public abstract class L2Item extends ListenersContainer implements IIdentifiable
 		return getItemType() == EtcItemType.PET_COLLAR;
 	}
 	
+	/**
+	 * @return skill that player get when has equipped armor +4 or more
+	 */
 	public Skill getEnchant4Skill() {
 		return null;
 	}

@@ -37,8 +37,7 @@ import com.l2jserver.gameserver.util.GMAudit;
 import com.l2jserver.gameserver.util.Util;
 
 /**
- * This class ...
- * @version $Revision: 1.11.2.1.2.7 $ $Date: 2005/04/02 21:25:21 $
+ * @since 2005/04/02 21:25:21
  */
 public final class RequestDropItem extends L2GameClientPacket {
 	private static final String _C__17_REQUESTDROPITEM = "[C] 17 RequestDropItem";
@@ -72,7 +71,7 @@ public final class RequestDropItem extends L2GameClientPacket {
 		L2ItemInstance item = activeChar.getInventory().getItemByObjectId(_objectId);
 		
 		if ((item == null) || (_count == 0) || !activeChar.validateItemManipulation(_objectId, "drop") || (!general().allowDiscardItem() && !activeChar.canOverrideCond(PcCondOverride.DROP_ALL_ITEMS))
-			|| (!item.isDropable() && !(activeChar.canOverrideCond(PcCondOverride.DROP_ALL_ITEMS) && general().gmTradeRestrictedItems())) || ((item.getItemType() == EtcItemType.PET_COLLAR) && activeChar.havePetInvItems()) || activeChar.isInsideZone(ZoneId.NO_ITEM_DROP)) {
+			|| (!item.isDroppable() && !(activeChar.canOverrideCond(PcCondOverride.DROP_ALL_ITEMS) && general().gmTradeRestrictedItems())) || ((item.getItemType() == EtcItemType.PET_COLLAR) && activeChar.havePetInvItems()) || activeChar.isInsideZone(ZoneId.NO_ITEM_DROP)) {
 			activeChar.sendPacket(SystemMessageId.CANNOT_DISCARD_THIS_ITEM);
 			return;
 		}

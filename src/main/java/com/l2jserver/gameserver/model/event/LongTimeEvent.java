@@ -18,6 +18,8 @@
  */
 package com.l2jserver.gameserver.model.event;
 
+import static com.l2jserver.gameserver.config.Configuration.server;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public class LongTimeEvent extends Quest {
 	// Drop data for event
 	private final List<GeneralDropItem> _dropList = new ArrayList<>();
 	
-	private class NpcSpawn {
+	private static class NpcSpawn {
 		protected final Location loc;
 		protected final int npcId;
 		
@@ -99,7 +101,7 @@ public class LongTimeEvent extends Quest {
 	 * Load event configuration file
 	 */
 	private void loadConfig() {
-		File configFile = new File("data/events/" + getName() + ".xml");
+		File configFile = new File(server().getDatapackRoot(), "data/events/" + getName() + ".xml");
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -227,7 +229,7 @@ public class LongTimeEvent extends Quest {
 		}
 		
 		// Add spawns
-		Long millisToEventEnd = _eventPeriod.getEndDate().getTime() - currentTime;
+		long millisToEventEnd = _eventPeriod.getEndDate().getTime() - currentTime;
 		if (_spawnList != null) {
 			for (NpcSpawn spawn : _spawnList) {
 				addSpawn(spawn.npcId, spawn.loc.getX(), spawn.loc.getY(), spawn.loc.getZ(), spawn.loc.getHeading(), false, millisToEventEnd, false);
