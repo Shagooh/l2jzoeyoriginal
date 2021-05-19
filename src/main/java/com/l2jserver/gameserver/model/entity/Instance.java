@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -54,6 +55,8 @@ import com.l2jserver.gameserver.model.TeleportWhereType;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
+import com.l2jserver.gameserver.model.actor.instance.L2ColosseumFence;
+import com.l2jserver.gameserver.model.actor.instance.L2ColosseumFence.FenceState;
 import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.actor.templates.L2DoorTemplate;
@@ -81,6 +84,7 @@ public final class Instance {
 	private final List<Integer> _players = new CopyOnWriteArrayList<>();
 	private final List<L2Npc> _npcs = new CopyOnWriteArrayList<>();
 	private final Map<Integer, L2DoorInstance> _doors = new ConcurrentHashMap<>();
+	private final Map<Integer, L2ColosseumFence> _fences = new ConcurrentHashMap<>();
 	private final Map<String, List<L2Spawn>> _manualSpawn = new HashMap<>();
 	// private StartPosType _enterLocationOrder; TODO implement me
 	private List<Location> _enterLocations = null;
@@ -243,11 +247,12 @@ public final class Instance {
 	 * Adds a door into the instance
 	 * @param doorId - from doors.xml
 	 * @param set - StatsSet for initializing door
+	 * @return the new door
 	 */
-	public void addDoor(int doorId, StatsSet set) {
+	public L2DoorInstance addDoor(int doorId, StatsSet set) {
 		if (_doors.containsKey(doorId)) {
 			_log.warning("Door ID " + doorId + " already exists in instance " + getId());
-			return;
+			return null;
 		}
 		
 		final L2DoorInstance newdoor = new L2DoorInstance(new L2DoorTemplate(set));
@@ -255,6 +260,14 @@ public final class Instance {
 		newdoor.setCurrentHp(newdoor.getMaxHp());
 		newdoor.spawnMe(newdoor.getTemplate().getX(), newdoor.getTemplate().getY(), newdoor.getTemplate().getZ());
 		_doors.put(doorId, newdoor);
+		return newdoor;
+	}
+	
+	public L2ColosseumFence addFence(int x, int y, int z, int minZ, int maxZ, int width, int height, FenceState state) {
+		L2ColosseumFence newFence = new L2ColosseumFence(getId(), x, y, z, minZ, maxZ, width, height, state);
+		newFence.spawnMe();
+		_fences.put(newFence.getObjectId(), newFence);
+		return newFence;
 	}
 	
 	public List<Integer> getPlayers() {
@@ -271,6 +284,10 @@ public final class Instance {
 	
 	public L2DoorInstance getDoor(int id) {
 		return _doors.get(id);
+	}
+	
+	public Collection<L2ColosseumFence> getFences() {
+		return _fences.values();
 	}
 	
 	public long getInstanceEndTime() {
@@ -366,6 +383,19 @@ public final class Instance {
 			}
 		}
 		_doors.clear();
+	}
+	
+	public void removeFences() {
+		for (L2ColosseumFence fence : _fences.values()) {
+			if (fence == null) {
+				continue;
+			}
+			
+			fence.decayMe();
+			fence.getKnownList().removeAllKnownObjects();
+		}
+		
+		_fences.clear();
 	}
 	
 	/**
@@ -478,6 +508,23 @@ public final class Instance {
 							}
 							addDoor(doorId, set);
 						}
+					}
+				}
+				case "colosseumfencelist" -> {
+					for (Node fenceNode = n.getFirstChild(); fenceNode != null; fenceNode = fenceNode.getNextSibling()) {
+						if (fenceNode.getNodeType() != Node.ELEMENT_NODE || !fenceNode.getNodeName().equals("colosseumfence")) {
+							continue;
+						}
+						
+						Element f = (Element) fenceNode;
+						int x = Integer.parseInt(f.getAttribute("x"));
+						int y = Integer.parseInt(f.getAttribute("y"));
+						int z = Integer.parseInt(f.getAttribute("z"));
+						int minz = Integer.parseInt(f.getAttribute("min_z"));
+						int maxz = Integer.parseInt(f.getAttribute("max_z"));
+						int width = Integer.parseInt(f.getAttribute("width"));
+						int height = Integer.parseInt(f.getAttribute("height"));
+						addFence(x, y, z, minz, maxz, width, height, FenceState.CLOSED);
 					}
 				}
 				case "spawnlist" -> {

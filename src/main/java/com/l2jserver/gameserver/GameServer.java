@@ -63,6 +63,7 @@ import com.l2jserver.gameserver.data.xml.impl.ArmorSetsData;
 import com.l2jserver.gameserver.data.xml.impl.BuyListData;
 import com.l2jserver.gameserver.data.xml.impl.CategoryData;
 import com.l2jserver.gameserver.data.xml.impl.ClassListData;
+import com.l2jserver.gameserver.data.xml.impl.ColosseumFenceData;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.data.xml.impl.EnchantItemData;
 import com.l2jserver.gameserver.data.xml.impl.EnchantItemGroupsData;
@@ -284,6 +285,7 @@ public final class GameServer {
 		StaticObjectData.getInstance();
 		ZoneManager.getInstance();
 		DoorData.getInstance();
+		ColosseumFenceData.getInstance();
 		CastleManager.getInstance().loadInstances();
 		NpcBufferTable.getInstance();
 		GrandBossManager.getInstance().initZones();

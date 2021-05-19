@@ -200,6 +200,7 @@ public final class InstanceManager implements IXmlReader {
 			temp.removeNpcs();
 			temp.removePlayers();
 			temp.removeDoors();
+			temp.removeFences();
 			temp.cancelTimer();
 			INSTANCES.remove(instanceid);
 			_instanceWorlds.remove(instanceid);

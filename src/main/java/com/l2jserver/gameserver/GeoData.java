@@ -28,6 +28,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.l2jserver.gameserver.data.xml.impl.ColosseumFenceData;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.L2World;
@@ -269,6 +270,9 @@ public class GeoData {
 		if (DoorData.getInstance().checkIfDoorsBetween(x, y, z, tx, ty, tz, instanceId, true)) {
 			return false;
 		}
+		if (ColosseumFenceData.getInstance().checkIfFencesBetween(x, y, z, tx, ty, tz, instanceId)) {
+			return false;
+		}
 		return canSeeTarget(x, y, z, tx, ty, tz);
 	}
 	
@@ -432,6 +436,9 @@ public class GeoData {
 		if (DoorData.getInstance().checkIfDoorsBetween(x, y, z, tx, ty, tz, instanceId, false)) {
 			return new Location(x, y, getHeight(x, y, z));
 		}
+		if (ColosseumFenceData.getInstance().checkIfFencesBetween(x, y, z, tx, ty, tz, instanceId)) {
+			return new Location(x, y, getHeight(x, y, z));
+		}
 		
 		LinePointIterator pointIter = new LinePointIterator(geoX, geoY, tGeoX, tGeoY);
 		// first point is guaranteed to be available
@@ -486,6 +493,9 @@ public class GeoData {
 		toZ = getNearestZ(tGeoX, tGeoY, toZ);
 		
 		if (DoorData.getInstance().checkIfDoorsBetween(fromX, fromY, fromZ, toX, toY, toZ, instanceId, false)) {
+			return false;
+		}
+		if (ColosseumFenceData.getInstance().checkIfFencesBetween(fromX, fromY, fromZ, toX, toY, toZ, instanceId)) {
 			return false;
 		}
 		
