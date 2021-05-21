@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.instancemanager.WalkingManager;
+import com.l2jserver.gameserver.model.actor.ActorDebugCategory;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcMoveRouteFinished;
@@ -73,7 +74,7 @@ public class WalkInfo {
 			}
 			
 			_currentNode = newNode;
-			npc.sendDebugMessage("Route: " + getRoute().getName() + ", next random node is " + _currentNode);
+			npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Route: " + getRoute().getName() + ", next random node is " + _currentNode);
 		} else {
 			if (_forward) {
 				_currentNode++;
@@ -85,7 +86,7 @@ public class WalkInfo {
 			{
 				// Notify quest
 				EventDispatcher.getInstance().notifyEventAsync(new OnNpcMoveRouteFinished(npc), npc);
-				npc.sendDebugMessage("Route: " + getRoute().getName() + ", last node arrived");
+				npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Route: " + getRoute().getName() + ", last node arrived");
 				
 				if (!getRoute().repeatWalk()) {
 					WalkingManager.getInstance().cancelMoving(npc);

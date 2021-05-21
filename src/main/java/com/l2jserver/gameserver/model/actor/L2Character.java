@@ -29,6 +29,7 @@ import static com.l2jserver.gameserver.config.Configuration.territoryWar;
 import static com.l2jserver.gameserver.model.stats.Stats.NUM_STATS;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +233,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	protected byte _zoneValidateCounter = 4;
 	
 	private L2Character _debugger = null;
+	private BitSet _enabledDebugCategories = new BitSet(ActorDebugCategory.values().length);
 	
 	private final ReentrantLock _teleportLock = new ReentrantLock();
 	private final StampedLock _attackLock = new StampedLock();
@@ -351,12 +353,26 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		_debugger = debugger;
 	}
 	
+	public void setDebugCategory(ActorDebugCategory category, boolean enable) {
+		_enabledDebugCategories.set(category.ordinal(), enable);
+	}
+	
+	public boolean toggleDebugCategory(ActorDebugCategory category) {
+		boolean newVal = !_enabledDebugCategories.get(category.ordinal());
+		setDebugCategory(category, newVal);
+		return newVal;
+	}
+	
 	/**
 	 * Send debug packet.
 	 * @param pkt
 	 */
 	public void sendDebugPacket(L2GameServerPacket pkt) {
-		if (_debugger != null) {
+		sendDebugPacket(pkt);
+	}
+	
+	public void sendDebugPacket(ActorDebugCategory category, L2GameServerPacket pkt) {
+		if (_debugger != null && (category == null || _enabledDebugCategories.get(category.ordinal()))) {
 			_debugger.sendPacket(pkt);
 		}
 	}
@@ -367,6 +383,12 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 */
 	public void sendDebugMessage(String msg) {
 		if (_debugger != null) {
+			_debugger.sendMessage(msg);
+		}
+	}
+	
+	public void sendDebugMessage(ActorDebugCategory category, String msg) {
+		if (_debugger != null && (category == null || _enabledDebugCategories.get(category.ordinal()))) {
 			_debugger.sendMessage(msg);
 		}
 	}

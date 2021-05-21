@@ -47,6 +47,7 @@ import com.l2jserver.gameserver.model.L2ExtractableSkill;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.PcCondOverride;
 import com.l2jserver.gameserver.model.StatsSet;
+import com.l2jserver.gameserver.model.actor.ActorDebugCategory;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Playable;
@@ -1066,7 +1067,7 @@ public final class Skill implements IIdentifiable {
 		}
 		
 		if (effected.isInvulAgainst(getId(), getLevel())) {
-			effected.sendDebugMessage("Skill " + toString() + " has been ignored (invul against)");
+			effected.sendDebugMessage(ActorDebugCategory.EFFECTS, "Skill " + toString() + " has been ignored (invul against)");
 			return;
 		}
 		

@@ -36,6 +36,7 @@ import com.l2jserver.gameserver.model.L2NpcWalkerNode;
 import com.l2jserver.gameserver.model.L2WalkRoute;
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.WalkInfo;
+import com.l2jserver.gameserver.model.actor.ActorDebugCategory;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2MonsterInstance;
 import com.l2jserver.gameserver.model.actor.tasks.npc.walker.ArrivedTask;
@@ -221,18 +222,18 @@ public final class WalkingManager implements IXmlReader {
 					if ((npc.getX() == node.getX()) && (npc.getY() == node.getY())) {
 						walk.calculateNextNode(npc);
 						node = walk.getCurrentNode();
-						npc.sendDebugMessage("Route '" + routeName + "': spawn point is same with first waypoint, adjusted to next");
+						npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Route '" + routeName + "': spawn point is same with first waypoint, adjusted to next");
 					}
 					
 					if (!npc.isInsideRadius(node, 3000, true, false)) {
 						final String message = "Route '" + routeName + "': NPC (id=" + npc.getId() + ", x=" + npc.getX() + ", y=" + npc.getY() + ", z=" + npc.getZ() + ") is too far from starting point (node x=" + node.getX() + ", y=" + node.getY() + ", z=" + node.getZ() + ", range="
 							+ npc.calculateDistance(node, true, true) + "), walking will not start!";
 						LOG.warn(message);
-						npc.sendDebugMessage(message);
+						npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, message);
 						return;
 					}
 					
-					npc.sendDebugMessage("Starting to move at route '" + routeName + "'");
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Starting to move at route '" + routeName + "'");
 					npc.setIsRunning(node.runToLocation());
 					npc.getAI().setIntention(CtrlIntention.AI_INTENTION_MOVE_TO, node);
 					walk.setWalkCheckTask(ThreadPoolManager.getInstance().scheduleAiAtFixedRate(new StartMovingTask(npc, routeName), 60000, 60000)); // start walk check task, for resuming walk after fight
@@ -241,7 +242,7 @@ public final class WalkingManager implements IXmlReader {
 					
 					_activeRoutes.put(npc.getObjectId(), walk); // register route
 				} else {
-					npc.sendDebugMessage("Failed to start moving along route '" + routeName + "', scheduled");
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Failed to start moving along route '" + routeName + "', scheduled");
 					ThreadPoolManager.getInstance().scheduleGeneral(new StartMovingTask(npc, routeName), 60000);
 				}
 			} else
@@ -255,19 +256,19 @@ public final class WalkingManager implements IXmlReader {
 					
 					// Prevent call simultaneously from scheduled task and onArrived() or temporarily stop walking for resuming in future
 					if (walk.isBlocked() || walk.isSuspended()) {
-						npc.sendDebugMessage("Failed to continue moving along route '" + routeName + "' (operation is blocked)");
+						npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Failed to continue moving along route '" + routeName + "' (operation is blocked)");
 						return;
 					}
 					
 					walk.setBlocked(true);
 					final L2NpcWalkerNode node = walk.getCurrentNode();
-					npc.sendDebugMessage("Route '" + routeName + "', continuing to node " + walk.getCurrentNodeId());
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Route '" + routeName + "', continuing to node " + walk.getCurrentNodeId());
 					npc.setIsRunning(node.runToLocation());
 					npc.getAI().setIntention(CtrlIntention.AI_INTENTION_MOVE_TO, node);
 					walk.setBlocked(false);
 					walk.setStoppedByAttack(false);
 				} else {
-					npc.sendDebugMessage("Failed to continue moving along route '" + routeName + "' (wrong AI state - " + npc.getAI().getIntention() + ")");
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Failed to continue moving along route '" + routeName + "' (wrong AI state - " + npc.getAI().getIntention() + ")");
 				}
 			}
 		}
@@ -348,8 +349,8 @@ public final class WalkingManager implements IXmlReader {
 			if ((walk.getCurrentNodeId() >= 0) && (walk.getCurrentNodeId() < walk.getRoute().getNodesCount())) {
 				final L2NpcWalkerNode node = walk.getRoute().getNodeList().get(walk.getCurrentNodeId());
 				if (npc.isInsideRadius(node, 10, false, false)) {
-					npc.sendDebugMessage("Route '" + walk.getRoute().getName() + "', arrived to node " + walk.getCurrentNodeId());
-					npc.sendDebugMessage("Done in " + ((System.currentTimeMillis() - walk.getLastAction()) / 1000) + " s");
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Route '" + walk.getRoute().getName() + "', arrived to node " + walk.getCurrentNodeId());
+					npc.sendDebugMessage(ActorDebugCategory.MOVEMENT, "Done in " + ((System.currentTimeMillis() - walk.getLastAction()) / 1000) + " s");
 					walk.calculateNextNode(npc);
 					walk.setBlocked(true); // prevents to be ran from walk check task, if there is delay in this node.
 					
