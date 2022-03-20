@@ -62,7 +62,7 @@ public class ValidatePosition extends L2GameClientPacket {
 		final int realY = activeChar.getY();
 		int realZ = activeChar.getZ();
 		int realHeading = activeChar.getHeading();
-		int realVehicle = activeChar.getVehicle().getObjectId();
+		int realVehicle = activeChar.getVehicle() != null ? activeChar.getVehicle().getObjectId() : 0;
 		activeChar.debugFeature(DebugFeature.MOVE,
 			"ValidatePos[x={}, y={}, z={}, heading={}, vehicle={}], serverX={}, serverY={}, serverZ={}, serverHeading={}, serverVehicle={}",
 			_x, _y, _z, _heading, _data, realX, realY, realZ, realHeading, realVehicle);
