@@ -348,7 +348,6 @@ import com.l2jserver.gameserver.util.Util;
  * There is always a client-thread connected to this (except if a player-store is activated upon logout).
  */
 public final class L2PcInstance extends L2Playable {
-	
 	public static final int ID_NONE = -1;
 	public static final int REQUEST_TIMEOUT = 15;
 	private static final Logger LOG = LoggerFactory.getLogger(L2PcInstance.class);
@@ -748,7 +747,7 @@ public final class L2PcInstance extends L2Playable {
 			if (player == null) {
 				return null;
 			}
-			
+
 			DAOFactory.getInstance().getPlayerDAO().loadCharacters(player);
 			
 			// Retrieve from the database all items of this L2PcInstance and add them to _inventory
@@ -10946,25 +10945,5 @@ public final class L2PcInstance extends L2Playable {
 	// TODO(Zoey76): Improve this.
 	public void getDwarvenRecipeBookClear() {
 		_dwarvenRecipeBook.clear();
-	}
-	
-	public void debugFeature(String feature, String msg) {
-		msg = feature + " (" + getName() + ") " + msg;
-		LOG.debug(msg);
-		sendDebugMessage(msg);
-	}
-	
-	public void debugFeature(String feature, String msg, Object arg) {
-		msg = feature + " (" + getName() + ") " + msg;
-		var formatted = MessageFormatter.format(msg, arg);
-		LOG.debug(formatted.getMessage());
-		sendDebugMessage(formatted.getMessage());
-	}
-
-	public void debugFeature(String feature, String msg, Object... args) {
-		msg = feature + " (" + getName() + ") " + msg;
-		var formatted = MessageFormatter.format(msg, args);
-		LOG.debug(formatted.getMessage());
-		sendDebugMessage(formatted.getMessage());
 	}
 }

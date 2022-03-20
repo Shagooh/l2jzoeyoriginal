@@ -18,12 +18,12 @@
  */
 package com.l2jserver.gameserver.network.clientpackets;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
 import static com.l2jserver.gameserver.config.Configuration.geodata;
 
-import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.model.L2World;
+import com.l2jserver.gameserver.model.actor.L2Character.DebugFeature;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.serverpackets.GetOnVehicle;
 import com.l2jserver.gameserver.network.serverpackets.ValidateLocation;
@@ -56,15 +56,17 @@ public class ValidatePosition extends L2GameClientPacket {
 			return;
 		}
 		
+		activeChar.updatePosition();
+		
 		final int realX = activeChar.getX();
 		final int realY = activeChar.getY();
 		int realZ = activeChar.getZ();
-		
-		if (general().developer()) {
-			_log.fine("client pos: " + _x + " " + _y + " " + _z + " head " + _heading);
-			_log.fine("server pos: " + realX + " " + realY + " " + realZ + " head " + activeChar.getHeading());
-		}
-		
+		int realHeading = activeChar.getHeading();
+		int realVehicle = activeChar.getVehicle().getObjectId();
+		activeChar.debugFeature(DebugFeature.MOVE,
+			"ValidatePos[x={}, y={}, z={}, heading={}, vehicle={}], serverX={}, serverY={}, serverZ={}, serverHeading={}, serverVehicle={}",
+			_x, _y, _z, _heading, _data, realX, realY, realZ, realHeading, realVehicle);
+
 		if ((_x == 0) && (_y == 0)) {
 			if (realX != 0) {
 				return;
@@ -85,8 +87,7 @@ public class ValidatePosition extends L2GameClientPacket {
 				}
 			}
 			return;
-		}
-		if (activeChar.isInAirShip()) {
+		} else if (activeChar.isInAirShip()) {
 			// Zoey76: TODO: Implement or cleanup.
 			// if (Config.COORD_SYNCHRONIZE == 2)
 			// {
@@ -100,9 +101,7 @@ public class ValidatePosition extends L2GameClientPacket {
 			// }
 			// }
 			return;
-		}
-		
-		if (activeChar.isFalling(_z)) {
+		} else if (activeChar.isFalling(_z)) {
 			return; // disable validations during fall to avoid "jumping"
 		}
 		
@@ -166,10 +165,7 @@ public class ValidatePosition extends L2GameClientPacket {
 					activeChar.setXYZ(realX, realY, _z);
 					realZ = _z;
 				} else {
-					if (general().developer()) {
-						_log.info(activeChar.getName() + ": Synchronizing position Server --> Client");
-					}
-					
+					activeChar.debugFeature(DebugFeature.MOVE, "Synchronizing position Server --> Client");
 					activeChar.sendPacket(new ValidateLocation(activeChar));
 				}
 			}

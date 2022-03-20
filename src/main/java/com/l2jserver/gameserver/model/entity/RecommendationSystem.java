@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
+import com.l2jserver.gameserver.model.actor.L2Character.DebugFeature;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+
 import com.l2jserver.gameserver.model.actor.tasks.player.RecoBonusTask;
 import com.l2jserver.gameserver.model.actor.tasks.player.RecoGiveTask;
 import com.l2jserver.gameserver.network.serverpackets.ExVoteSystemInfo;
@@ -87,36 +89,36 @@ public class RecommendationSystem {
 	 */
 	public void startBonusTask(boolean xpSpGain) {
 		if (xpSpGain) {
-			_player.debugFeature("RecBonus", "Set peace pause flag to false.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Set peace pause flag to false.");
 			_recoBonusPeacePause = false;
 		} else {
 			int newCount = _recoBonusOtherPause.updateAndGet(i -> i > 0 ? i - 1 : 0);
-			_player.debugFeature("RecBonus", "Decrement count of other pauses to {}", newCount);
+			_player.debugFeature(DebugFeature.REC_BONUS, "Decrement count of other pauses to {}", newCount);
 		}
 		
 		if (getBonusTime() <= 0) {
-			_player.debugFeature("RecBonus", "Not scheduling task because bonus time is {}.", getBonusTime());
+			_player.debugFeature(DebugFeature.REC_BONUS, "Not scheduling task because bonus time is {}.", getBonusTime());
 			return;
 		}
 		
 		if (_recoBonusPeacePause) {
-			_player.debugFeature("RecBonus", "Not scheduling task because it was paused by peace.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Not scheduling task because it was paused by peace.");
 			return;
 		}
 		
 		if (_recoBonusOtherPause.get() > 0) {
-			_player.debugFeature("RecBonus", "Not scheduling task because it was paused by other mechanisms than peace.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Not scheduling task because it was paused by other mechanisms than peace.");
 			return;
 		}
 		
 		if (isBonusTaskActive()) {
-			_player.debugFeature("RecBonus", "Not scheduling task because it was already scheduled.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Not scheduling task because it was already scheduled.");
 			return;
 		}
 		
 		scheduleBonusTask(getBonusTime());
 		
-		_player.debugFeature("RecBonus", "Starting task.");
+		_player.debugFeature(DebugFeature.REC_BONUS, "Starting task.");
 		_player.sendPacket(new ExVoteSystemInfo(_player));
 	}
 	
@@ -128,15 +130,15 @@ public class RecommendationSystem {
 	 */
 	public void stopBonusTask(boolean peaceZone) {
 		if (peaceZone) {
-			_player.debugFeature("RecBonus", "Set peace pause flag to true.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Set peace pause flag to true.");
 			_recoBonusPeacePause = true;
 		} else {
 			int newCount = _recoBonusOtherPause.incrementAndGet();
-			_player.debugFeature("RecBonus", "Increment count of other pauses to {}", newCount);
+			_player.debugFeature(DebugFeature.REC_BONUS, "Increment count of other pauses to {}", newCount);
 		}
 		
 		if (!isBonusTaskActive()) {
-			_player.debugFeature("RecBonus", "Not stopping task because it is not started.");
+			_player.debugFeature(DebugFeature.REC_BONUS, "Not stopping task because it is not started.");
 			return;
 		}
 
@@ -144,7 +146,7 @@ public class RecommendationSystem {
 		cancelBonusTask();
 		setBonusTime(remainingTime);
 
-		_player.debugFeature("RecBonus", "Stopping task.");
+		_player.debugFeature(DebugFeature.REC_BONUS, "Stopping task.");
 		_player.sendPacket(new ExVoteSystemInfo(_player));
 	}
 	
@@ -156,7 +158,7 @@ public class RecommendationSystem {
 		cancelBonusTask();
 		setBonusTime(0);
 		
-		_player.debugFeature("RecBonus", "Finishing task.");
+		_player.debugFeature(DebugFeature.REC_BONUS, "Finishing task.");
 		_player.sendPacket(new ExVoteSystemInfo(_player));
 	}
 	

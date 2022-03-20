@@ -25,6 +25,7 @@ import java.nio.BufferUnderflowException;
 
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.model.Location;
+import com.l2jserver.gameserver.model.actor.L2Character.DebugFeature;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
@@ -78,6 +79,10 @@ public class MoveBackwardToLocation extends L2GameClientPacket {
 			activeChar.sendPacket(ActionFailed.STATIC_PACKET);
 			return;
 		}
+		
+		activeChar.debugFeature(DebugFeature.MOVE,
+			"MoveBackToLoc[tx={} ty={} tz={} x={} y={} z={}] serverX={} serverY={} serverZ={}",
+			_targetX, _targetY, _targetZ, _originX, _originY, _originZ, activeChar.getX(), activeChar.getY(), activeChar.getZ());
 		
 		if ((_targetX == _originX) && (_targetY == _originY) && (_targetZ == _originZ)) {
 			activeChar.sendPacket(new StopMove(activeChar));

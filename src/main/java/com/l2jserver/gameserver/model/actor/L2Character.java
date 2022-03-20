@@ -44,6 +44,7 @@ import java.util.concurrent.locks.StampedLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.GameTimeController;
@@ -186,6 +187,13 @@ import com.l2jserver.gameserver.util.Util;
  */
 public abstract class L2Character extends L2Object implements ISkillsHolder, IDeletable {
 	private static final Logger LOG = LoggerFactory.getLogger(L2Character.class);
+
+	public enum DebugFeature {
+		MOVE,
+		REC_BONUS,
+	}
+
+	private static final Map<DebugFeature, Boolean> _DEBUG_FEATURE = new ConcurrentHashMap<DebugFeature, Boolean>();
 	
 	private volatile Set<L2Character> _attackByList;
 	private volatile boolean _isCastingNow = false;
@@ -348,7 +356,26 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * @param debugger the character debugging this character
 	 */
 	public void setDebug(L2Character debugger) {
+		if (debugger != null) {
+			_DEBUG_FEATURE.compute(DebugFeature.MOVE, (k,v)->true);
+//			for (DebugFeature feature : DebugFeature.values()) {
+//				_DEBUG_FEATURE.compute(feature, (k,v)->true);
+//			}
+		} else {
+			for (DebugFeature feature : DebugFeature.values()) {
+				_DEBUG_FEATURE.compute(feature, (k,v)->false);
+			}
+		}
+
 		_debugger = debugger;
+	}
+
+	/**
+	 * Sets character instance, to which debug packets will be send.
+	 * @param debugger the character debugging this character
+	 */
+	public void setDebug(L2Character debugger, String feature) {
+		setDebug(debugger);
 	}
 	
 	/**
@@ -369,6 +396,35 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		if (_debugger != null) {
 			_debugger.sendMessage(msg);
 		}
+	}
+
+	public void debugFeature(DebugFeature feature, String msg) {
+		if (!_DEBUG_FEATURE.getOrDefault(feature, false)) {
+			return;
+		}
+		msg = feature + " (" + getName() + ") " + msg;
+		LOG.debug(msg);
+		sendDebugMessage(msg);
+	}
+	
+	public void debugFeature(DebugFeature feature, String msg, Object arg) {
+		if (!_DEBUG_FEATURE.getOrDefault(feature, false)) {
+			return;
+		}
+		msg = feature + " (" + getName() + ") " + msg;
+		var formatted = MessageFormatter.format(msg, arg);
+		LOG.debug(formatted.getMessage());
+		sendDebugMessage(formatted.getMessage());
+	}
+
+	public void debugFeature(DebugFeature feature, String msg, Object... args) {
+		if (!_DEBUG_FEATURE.getOrDefault(feature, false)) {
+			return;
+		}
+		msg = feature + " (" + getName() + ") " + msg;
+		var formatted = MessageFormatter.format(msg, args);
+		LOG.debug(formatted.getMessage());
+		sendDebugMessage(formatted.getMessage());
 	}
 	
 	/**
