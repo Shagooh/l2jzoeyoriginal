@@ -3388,7 +3388,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 			m._yAccurate += dy * distFraction;
 			
 			// Set the position of the L2Character to estimated after parcial move
-			super.setXYZ((int) (m._xAccurate), (int) (m._yAccurate), zPrev + (int) ((dz * distFraction) + 0.5));
+			//zPrev + (int) ((dz * distFraction) + 0.5)
+			super.setXYZ((int) (m._xAccurate), (int) (m._yAccurate), GeoData.getInstance().traceTerrainZ(xPrev, yPrev, zPrev, (int) m._xAccurate, (int) m._yAccurate));
 		}
 		revalidateZone(false);
 		

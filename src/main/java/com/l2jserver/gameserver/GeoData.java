@@ -356,6 +356,7 @@ public class GeoData {
 			int curX = pointIter.x();
 			int curY = pointIter.y();
 			
+			// 3d iterator
 //			if ((curX == prevX) && (curY == prevY)) {
 //				continue;
 //			}
@@ -379,15 +380,10 @@ public class GeoData {
 				}
 				
 				boolean canSeeThrough = false;
-<<<<<<< Upstream, based on develop
 				if (curGeoZ <= maxHeight) {
-					if ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST) {
-=======
-				if (curGeoZ <= maxHeight)
-				{
-/*@formatter:off					if ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST)
+/*@formatter:off
+					if ((nswe & Cell.NSWE_NORTH_EAST) == Cell.NSWE_NORTH_EAST)
 					{
->>>>>>> 31bdc84 Testing without thoose strict checks.
 						int northGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY - 1, Cell.NSWE_EAST);
 						int eastGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX + 1, prevY, Cell.NSWE_NORTH);
 						canSeeThrough = (northGeoZ <= maxHeight) && (eastGeoZ <= maxHeight) && (northGeoZ <= getNearestZ(prevX, prevY - 1, curBeeZ)) && (eastGeoZ <= getNearestZ(prevX + 1, prevY, curBeeZ));
@@ -402,15 +398,12 @@ public class GeoData {
 					} else if ((nswe & Cell.NSWE_SOUTH_WEST) == Cell.NSWE_SOUTH_WEST) {
 						int southGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX, prevY + 1, Cell.NSWE_WEST);
 						int westGeoZ = getLosGeoZ(prevX, prevY, prevGeoZ, prevX - 1, prevY, Cell.NSWE_SOUTH);
-<<<<<<< Upstream, based on develop
 						canSeeThrough = (southGeoZ <= maxHeight) && (westGeoZ <= maxHeight) && (southGeoZ <= getNearestZ(prevX, prevY + 1, curBeeZ)) && (westGeoZ <= getNearestZ(prevX - 1, prevY, curBeeZ));
 					} else {
-=======
 						canSeeThrough = (southGeoZ <= maxHeight) && (westGeoZ <= maxHeight);
 					}
 					else
 					{*/
->>>>>>> 31bdc84 Testing without thoose strict checks.
 						canSeeThrough = true;
 //					} @formatter:on
 				}

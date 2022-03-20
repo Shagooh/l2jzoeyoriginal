@@ -10176,8 +10176,19 @@ public final class L2PcInstance extends L2Playable {
 		if (isDead() || isFlying() || isFlyingMounted() || isInsideZone(ZoneId.WATER)) {
 			return false;
 		}
+
+		int serverX = getX();
+		int serverY = getY();
+		int serverZ = getZ();
+		int spawnZ = GeoData.getInstance().getSpawnHeight(serverX, serverY, serverZ);
 		
 		if (System.currentTimeMillis() < _fallingTimestamp) {
+			if (spawnZ >= z && spawnZ <= serverZ) {
+				sendPacket(new ValidateLocation(this));
+				stopFalling();
+				return false;
+			}
+
 			return true;
 		}
 		
@@ -10200,8 +10211,7 @@ public final class L2PcInstance extends L2Playable {
 		}
 		
 		setFalling();
-		
-		return false;
+		return true;
 	}
 	
 	/**
@@ -10209,6 +10219,13 @@ public final class L2PcInstance extends L2Playable {
 	 */
 	public void setFalling() {
 		_fallingTimestamp = System.currentTimeMillis() + FALLING_VALIDATION_DELAY;
+	}
+	
+	/**
+	 * Set falling timestamp to 0
+	 */
+	public void stopFalling() {
+		_fallingTimestamp = 0;
 	}
 	
 	/**
