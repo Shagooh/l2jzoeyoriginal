@@ -193,7 +193,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		REC_BONUS,
 	}
 
-	private static final Map<DebugFeature, Boolean> _DEBUG_FEATURE = new ConcurrentHashMap<DebugFeature, Boolean>();
+	private static final Map<DebugFeature, Boolean> _DEBUG_FEATURE = new ConcurrentHashMap<>();
+	private static String _DEBUG_LOG = new String();
 	
 	private volatile Set<L2Character> _attackByList;
 	private volatile boolean _isCastingNow = false;
@@ -397,14 +398,25 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 			_debugger.sendMessage(msg);
 		}
 	}
+	
+	public void putDebugLog(String msg) {
+		LOG.debug(msg);
+		sendDebugMessage(msg);
+		_DEBUG_LOG += msg + "<br1>";
+		if (_DEBUG_LOG.length() > 16250 * 3) {
+			_DEBUG_LOG.substring(_DEBUG_LOG.length() - (16250 * 3));
+		}
+		if (_debugger != null) {
+			Util.sendCBHtml(getActingPlayer(), _DEBUG_LOG);
+		}
+	}
 
 	public void debugFeature(DebugFeature feature, String msg) {
 		if (!_DEBUG_FEATURE.getOrDefault(feature, false)) {
 			return;
 		}
 		msg = feature + " (" + getName() + ") " + msg;
-		LOG.debug(msg);
-		sendDebugMessage(msg);
+		putDebugLog(msg);
 	}
 	
 	public void debugFeature(DebugFeature feature, String msg, Object arg) {
@@ -413,8 +425,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		}
 		msg = feature + " (" + getName() + ") " + msg;
 		var formatted = MessageFormatter.format(msg, arg);
-		LOG.debug(formatted.getMessage());
-		sendDebugMessage(formatted.getMessage());
+		putDebugLog(formatted.getMessage());
 	}
 
 	public void debugFeature(DebugFeature feature, String msg, Object... args) {
@@ -422,9 +433,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 			return;
 		}
 		msg = feature + " (" + getName() + ") " + msg;
-		var formatted = MessageFormatter.format(msg, args);
-		LOG.debug(formatted.getMessage());
-		sendDebugMessage(formatted.getMessage());
+		var formatted = MessageFormatter.arrayFormat(msg, args);
+		putDebugLog(formatted.getMessage());
 	}
 	
 	/**
