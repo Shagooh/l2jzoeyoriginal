@@ -240,7 +240,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	private final byte[] _zones = new byte[ZoneId.getZoneCount()];
 	protected byte _zoneValidateCounter = 4;
 	
-	private L2Character _debugger = null;
+	private L2PcInstance _debugger = null;
 	
 	private final ReentrantLock _teleportLock = new ReentrantLock();
 	private final StampedLock _attackLock = new StampedLock();
@@ -400,14 +400,14 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	}
 	
 	public void putDebugLog(String msg) {
-		LOG.debug(msg);
+		//LOG.debug(msg);
 		sendDebugMessage(msg);
-		_DEBUG_LOG += msg + "<br1>";
-		if (_DEBUG_LOG.length() > 16250 * 3) {
-			_DEBUG_LOG.substring(_DEBUG_LOG.length() - (16250 * 3));
+		_DEBUG_LOG = msg + "<br1>";
+		if (_DEBUG_LOG.length() > 16000 * 3) {
+			_DEBUG_LOG.substring(_DEBUG_LOG.length() - (16000 * 3));
 		}
 		if (_debugger != null) {
-			Util.sendCBHtml(getActingPlayer(), _DEBUG_LOG);
+			Util.sendCBHtml(_debugger, "<html><body>"+_DEBUG_LOG+"</body></html>");
 		}
 	}
 
