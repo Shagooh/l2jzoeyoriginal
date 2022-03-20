@@ -356,7 +356,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * Sets character instance, to which debug packets will be send.
 	 * @param debugger the character debugging this character
 	 */
-	public void setDebug(L2Character debugger) {
+	public void setDebug(L2PcInstance debugger) {
 		if (debugger != null) {
 			_DEBUG_FEATURE.compute(DebugFeature.MOVE, (k,v)->true);
 //			for (DebugFeature feature : DebugFeature.values()) {
@@ -375,7 +375,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * Sets character instance, to which debug packets will be send.
 	 * @param debugger the character debugging this character
 	 */
-	public void setDebug(L2Character debugger, String feature) {
+	public void setDebug(L2PcInstance debugger, String feature) {
 		setDebug(debugger);
 	}
 	
