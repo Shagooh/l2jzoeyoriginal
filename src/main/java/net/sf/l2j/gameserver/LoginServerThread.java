@@ -112,8 +112,8 @@ public class LoginServerThread extends Thread {
 		}
 		_acceptAlternate = Config.ACCEPT_ALTERNATE_ID;
 		_reserveHost = Config.RESERVE_HOST_ON_LOGIN;
-		_subnets = IPConfigData.getInstance().getSubnets();
-		_hosts = IPConfigData.getInstance().getHosts();
+		_subnets = IPConfig.getInstance().getSubnets();
+		_hosts = IPConfig.getInstance().getHosts();
 		_waitingClients = new FastList<>();
 		_accountsInGameServer = new FastMap<String, L2GameClient>().shared();
 		_maxPlayer = Config.MAXIMUM_ONLINE_USERS;
