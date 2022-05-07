@@ -41,12 +41,12 @@ import java.util.stream.IntStream;
 
 /**
  * IP Config.
- *
+ * 
  * @author Zoey76
  * @version 2.6.1.0
  */
 public class IPConfig implements IXmlReader {
-
+	
 	private static final Logger LOG = Logger.getLogger(IPConfig.class.getName());
 	
 	private static final String IP_CONFIG_FILE = "./config/ipconfig.xml";
@@ -81,13 +81,13 @@ public class IPConfig implements IXmlReader {
 						attrs = d.getAttributes();
 						_subnets.add(attrs.getNamedItem("subnet").getNodeValue());
 						_hosts.add(attrs.getNamedItem("address").getNodeValue());
-
+						
 						if (_hosts.size() != _subnets.size()) {
 							LOG.warning("Failed to load " + IP_CONFIG_FILE + " file - subnets does not match server addresses.");
 						}
 					}
 				}
-
+				
 				Node att = n.getAttributes().getNamedItem("address");
 				if (att == null) {
 					LOG.warning("Failed to load " + IP_CONFIG_FILE + " file - default server address is missing.");
@@ -111,26 +111,26 @@ public class IPConfig implements IXmlReader {
 			LOG.warning("Failed to connect to ip1.dynupdate.no-ip.com:8245 please check your internet connection using 127.0.0.1!");
 			externalIp = "127.0.0.1";
 		}
-
+		
 		try {
 			Enumeration<NetworkInterface> niList = NetworkInterface.getNetworkInterfaces();
-
+			
 			while (niList.hasMoreElements()) {
 				NetworkInterface ni = niList.nextElement();
-
+				
 				if (!ni.isUp() || ni.isVirtual()) {
 					continue;
 				}
-
+				
 				if (!ni.isLoopback() && ((ni.getHardwareAddress() == null) || (ni.getHardwareAddress().length != 6))) {
 					continue;
 				}
-
+				
 				for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
 					if (ia.getAddress() instanceof Inet6Address) {
 						continue;
 					}
-
+					
 					final String hostAddress = ia.getAddress().getHostAddress();
 					final int subnetPrefixLength = ia.getNetworkPrefixLength();
 					final int subnetMaskInt = IntStream.rangeClosed(1, subnetPrefixLength).reduce((r, e) -> (r << 1) + 1).orElse(0) << (32 - subnetPrefixLength);
@@ -145,7 +145,7 @@ public class IPConfig implements IXmlReader {
 					}
 				}
 			}
-
+			
 			// External host and subnet
 			_hosts.add(externalIp);
 			_subnets.add("0.0.0.0/0");
@@ -155,25 +155,25 @@ public class IPConfig implements IXmlReader {
 			System.exit(0);
 		}
 	}
-
+	
 	public List<String> getSubnets() {
 		if (_subnets.isEmpty()) {
 			return List.of("0.0.0.0/0");
 		}
 		return _subnets;
 	}
-
+	
 	public List<String> getHosts() {
 		if (_hosts.isEmpty()) {
 			return List.of("127.0.0.1");
 		}
 		return _hosts;
 	}
-
+	
 	public static IPConfig getInstance() {
 		return SingletonHolder.INSTANCE;
 	}
-
+	
 	private static class SingletonHolder {
 		protected static final IPConfig INSTANCE = new IPConfig();
 	}
