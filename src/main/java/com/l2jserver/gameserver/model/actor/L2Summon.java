@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -100,12 +100,11 @@ public abstract class L2Summon extends L2Playable {
 	public L2Summon(L2NpcTemplate template, L2PcInstance owner) {
 		super(template);
 		setInstanceType(L2Summon);
-		setInstanceId(owner.getInstanceId());
 		setShowSummonAnimation(true);
 		_owner = owner;
 		getAI();
 		
-		setXYZInvisible(owner.getX() + Rnd.get(-100, 100), owner.getY() + Rnd.get(-100, 100), owner.getZ());
+		setLocationInvisible(owner.getX() + Rnd.get(-100, 100), owner.getY() + Rnd.get(-100, 100), owner.getZ(), owner.getHeading(), owner.getInstanceId());
 		
 		// Copy the skills from template.
 		for (Skill skill : template.getSkills().values()) {

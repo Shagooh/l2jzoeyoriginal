@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -584,10 +584,7 @@ public final class TerritoryWarManager implements Siegable {
 		try {
 			final L2Spawn spawnDat = new L2Spawn(npcId);
 			spawnDat.setAmount(1);
-			spawnDat.setX(loc.getX());
-			spawnDat.setY(loc.getY());
-			spawnDat.setZ(loc.getZ());
-			spawnDat.setHeading(loc.getHeading());
+			spawnDat.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading());
 			spawnDat.stopRespawn();
 			return spawnDat.spawnOne(false);
 		} catch (Exception e) {

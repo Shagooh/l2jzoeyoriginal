@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -148,11 +148,8 @@ public class L2Event {
 	public static void spawnEventNpc(L2PcInstance target) {
 		try {
 			final L2Spawn spawn = new L2Spawn(_npcId);
-			spawn.setX(target.getX() + 50);
-			spawn.setY(target.getY() + 50);
-			spawn.setZ(target.getZ());
+			spawn.setLocation(target, target.getHeading(), -1);
 			spawn.setAmount(1);
-			spawn.setHeading(target.getHeading());
 			spawn.stopRespawn();
 			SpawnTable.getInstance().addNewSpawn(spawn, false);
 			

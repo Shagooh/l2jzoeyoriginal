@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -98,8 +98,8 @@ public class BoatManager {
 		npcDat.set("baseMDef", 100);
 		
 		final L2BoatInstance boat = new L2BoatInstance(new L2CharTemplate(npcDat));
-		boat.setHeading(heading);
-		boat.setXYZInvisible(x, y, z);
+		boat.setLocation(x, y, z, heading);
+		boat.setIsVisible(false);
 		boat.spawnMe();
 		
 		_boats.put(boat.getObjectId(), boat);

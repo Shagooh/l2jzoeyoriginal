@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -145,10 +145,7 @@ public abstract class ClanHallSiegeEngine extends Quest implements Siegable {
 				try (var rset = ps.executeQuery()) {
 					while (rset.next()) {
 						final L2Spawn spawn = new L2Spawn(rset.getInt("npcId"));
-						spawn.setX(rset.getInt("x"));
-						spawn.setY(rset.getInt("y"));
-						spawn.setZ(rset.getInt("z"));
-						spawn.setHeading(rset.getInt("heading"));
+						spawn.setLocation(rset.getInt("x"), rset.getInt("y"), rset.getInt("z"), rset.getInt("heading"));
 						spawn.setRespawnDelay(rset.getInt("respawnDelay"));
 						spawn.setAmount(1);
 						_guards.add(spawn);

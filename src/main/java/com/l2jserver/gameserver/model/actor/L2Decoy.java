@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -36,7 +36,7 @@ public abstract class L2Decoy extends L2Character {
 		super(template);
 		setInstanceType(InstanceType.L2Decoy);
 		_owner = owner;
-		setXYZInvisible(owner.getX(), owner.getY(), owner.getZ());
+		setLocationInvisible(owner);
 		setIsInvul(false);
 	}
 	

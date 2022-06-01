@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -23,15 +23,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.l2jserver.gameserver.model.Hit;
-import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Character;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 
 public class Attack extends L2GameServerPacket {
 	private final int _attackerObjId;
 	private final boolean _soulshot;
 	private final int _ssGrade;
-	private final Location _attackerLoc;
-	private final Location _targetLoc;
+	private final IImmutablePosition _attackerPos;
+	private final IImmutablePosition _targetPos;
 	private final List<Hit> _hits = new ArrayList<>();
 	
 	/**
@@ -44,8 +44,8 @@ public class Attack extends L2GameServerPacket {
 		_attackerObjId = attacker.getObjectId();
 		_soulshot = useShots;
 		_ssGrade = ssGrade;
-		_attackerLoc = new Location(attacker);
-		_targetLoc = new Location(target);
+		_attackerPos = attacker.getImmutablePosition();
+		_targetPos = target.getImmutablePosition();
 	}
 	
 	/**
@@ -91,13 +91,13 @@ public class Attack extends L2GameServerPacket {
 		
 		writeD(_attackerObjId);
 		writeHit(it.next());
-		writeLoc(_attackerLoc);
+		writeLoc(_attackerPos);
 		
 		writeH(_hits.size() - 1);
 		while (it.hasNext()) {
 			writeHit(it.next());
 		}
 		
-		writeLoc(_targetLoc);
+		writeLoc(_targetPos);
 	}
 }

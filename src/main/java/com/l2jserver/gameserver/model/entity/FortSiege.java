@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -886,10 +886,7 @@ public class FortSiege implements Siegable {
 			for (FortSiegeSpawn _sp : FortSiegeManager.getInstance().getCommanderSpawnList(getFort().getResidenceId())) {
 				final L2Spawn spawnDat = new L2Spawn(_sp.getId());
 				spawnDat.setAmount(1);
-				spawnDat.setX(_sp.getLocation().getX());
-				spawnDat.setY(_sp.getLocation().getY());
-				spawnDat.setZ(_sp.getLocation().getZ());
-				spawnDat.setHeading(_sp.getLocation().getHeading());
+				spawnDat.setLocation(_sp.getLocation().getX(), _sp.getLocation().getY(), _sp.getLocation().getZ(), _sp.getLocation().getHeading());
 				spawnDat.setRespawnDelay(60);
 				spawnDat.doSpawn();
 				spawnDat.stopRespawn();

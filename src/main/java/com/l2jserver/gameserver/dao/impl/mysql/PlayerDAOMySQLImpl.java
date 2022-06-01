@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -76,7 +76,6 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 					player.setLevel(rs.getInt("level"));
 					player.setSp(rs.getInt("sp"));
 					player.setWantsPeace(rs.getInt("wantspeace"));
-					player.setHeading(rs.getInt("heading"));
 					player.setKarma(rs.getInt("karma"));
 					player.setFame(rs.getInt("fame"));
 					player.setPvpKills(rs.getInt("pvpkills"));
@@ -150,7 +149,7 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 					player.getHuntingSystem().setNevitBlessingTime(rs.getInt("nevit_blessing_time"));
 					
 					// Set the x,y,z position of the L2PcInstance and make it invisible
-					player.setXYZInvisible(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"));
+					player.setLocationInvisible(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("heading"), 0);
 					
 					// Set Teleport Bookmark Slot
 					player.setBookMarkSlot(rs.getInt("BookmarkSlot"));

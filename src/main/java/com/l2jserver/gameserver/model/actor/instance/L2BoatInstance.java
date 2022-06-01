@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -67,7 +67,7 @@ public class L2BoatInstance extends L2Vehicle {
 		if (player.isOnline()) {
 			player.teleToLocation(loc.getX(), loc.getY(), loc.getZ());
 		} else {
-			player.setXYZInvisible(loc.getX(), loc.getY(), loc.getZ()); // disconnects handling
+			player.setLocationInvisible(loc); // disconnects handling
 		}
 	}
 	

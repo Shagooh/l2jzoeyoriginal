@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -629,7 +629,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * @param randomOffset
 	 */
 	public void teleToLocation(int x, int y, int z, int heading, int instanceId, int randomOffset) {
-		setInstanceId(instanceId);
+		//setInstanceId(instanceId);
 		
 		if (_isPendingRevive) {
 			doRevive();
@@ -658,11 +658,11 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		decayMe();
 		
 		// Set the x,y,z position of the L2Object and if necessary modify its _worldRegion
-		setXYZ(x, y, z);
-		
 		// temporary fix for heading on teleports
 		if (heading != 0) {
-			setHeading(heading);
+			setLocation(x, y, z, heading, instanceId);
+		} else {
+			setLocation(x, y, z, getHeading(), instanceId);
 		}
 		
 		// allow recall of the detached characters
@@ -708,12 +708,20 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	public void teleToLocation(ILocational loc, boolean randomOffset) {
 		teleToLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), loc.getInstanceId(), (randomOffset) ? character().getMaxOffsetOnTeleport() : 0);
 	}
+
+	public void teleToLocation(ILocational loc, int instanceId, boolean randomOffset) {
+		teleToLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), instanceId, (randomOffset) ? character().getMaxOffsetOnTeleport() : 0);
+	}
 	
 	public void teleToLocation(ILocational loc) {
 		teleToLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), loc.getInstanceId(), 0);
 	}
 	
 	public void teleToLocation(TeleportWhereType teleportWhere) {
+		teleToLocation(MapRegionManager.getInstance().getTeleToLocation(this, teleportWhere), true);
+	}
+
+	public void teleToLocation(TeleportWhereType teleportWhere, int instanceId) {
 		teleToLocation(MapRegionManager.getInstance().getTeleToLocation(this, teleportWhere), true);
 	}
 	

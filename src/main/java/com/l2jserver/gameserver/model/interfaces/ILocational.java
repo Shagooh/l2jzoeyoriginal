@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -18,44 +18,25 @@
  */
 package com.l2jserver.gameserver.model.interfaces;
 
+import com.l2jserver.gameserver.model.Location;
+
 /**
  * Object world location storage interface.
  * @author xban1x
  */
-public interface ILocational {
-	/**
-	 * Gets the X coordinate of this object.
-	 * @return the X coordinate
-	 */
-	int getX();
-	
-	/**
-	 * Gets the Y coordinate of this object.
-	 * @return the current Y coordinate
-	 */
-	int getY();
-	
-	/**
-	 * Gets the Z coordinate of this object.
-	 * @return the current Z coordinate
-	 */
-	int getZ();
-	
-	/**
-	 * Gets the heading of this object.
-	 * @return the current heading
-	 */
+public interface ILocational extends IPosition {
+	/** @return the heading */
 	int getHeading();
 	
 	/**
-	 * Gets the instance zone ID of this object.
-	 * @return the ID of the instance zone this object is currently in (0 - not in any instance)
+	 * Returns the instance zone id. When not participating in an instance, 0 is
+	 * returned.
+	 * @return the instance zone id
 	 */
 	int getInstanceId();
 	
 	/**
-	 * Gets this object's location.
-	 * @return a {@link ILocational} object containing the current position of this object
+	 * @return a snapshot of the objects location as a {@link Locational}
 	 */
-	ILocational getLocation();
+	Location getLocation();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  *
  * This file is part of L2J Server.
  *
@@ -39,13 +39,17 @@ public class LocationConverter implements Converter<Location> {
 		}
 		
 		final var tokens = input.replaceAll(" ", "").split(",");
-		final var location = new Location(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]));
+		final var x = Integer.parseInt(tokens[0]);
+		final var y = Integer.parseInt(tokens[1]);
+		final var z = Integer.parseInt(tokens[2]);
+		var heading = 0;
 		if (tokens.length >= 4) {
-			location.setHeading(Integer.parseInt(tokens[3]));
+			heading = Integer.parseInt(tokens[3]);
 		}
+		var instanceId = -1;
 		if (tokens.length == 5) {
-			location.setInstanceId(Integer.parseInt(tokens[4]));
+			instanceId = Integer.parseInt(tokens[4]);
 		}
-		return location;
+		return new Location(x, y, z, heading, instanceId);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -393,11 +393,10 @@ public class AutoSpawnHandler {
 				final int heading = locationList[locationIndex].getHeading();
 				
 				final L2Spawn newSpawn = new L2Spawn(spawnInst.getId());
-				newSpawn.setX(x);
-				newSpawn.setY(y);
-				newSpawn.setZ(z);
 				if (heading != -1) {
-					newSpawn.setHeading(heading);
+					newSpawn.setLocation(x, y, z, heading);
+				} else {
+					newSpawn.setXYZ(x, y, z);
 				}
 				newSpawn.setAmount(spawnInst.getSpawnCount());
 				if (spawnInst._desDelay == 0) {

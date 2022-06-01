@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -165,10 +165,7 @@ public final class DimensionalRiftManager {
 												if (_rooms.containsKey(type) && _rooms.get(type).containsKey(roomId)) {
 													final L2Spawn spawnDat = new L2Spawn(mobId);
 													spawnDat.setAmount(1);
-													spawnDat.setX(x);
-													spawnDat.setY(y);
-													spawnDat.setZ(z);
-													spawnDat.setHeading(-1);
+													spawnDat.setLocation(x, y, z, -1);
 													spawnDat.setRespawnDelay(delay);
 													SpawnTable.getInstance().addNewSpawn(spawnDat, false);
 													_rooms.get(type).get(roomId).getSpawns().add(spawnDat);

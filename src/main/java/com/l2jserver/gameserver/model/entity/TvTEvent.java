@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -539,7 +539,7 @@ public class TvTEvent {
 		if ((playerInstance != null) && (isStarting() || isStarted() || isParticipating())) {
 			if (removeParticipant(playerInstance.getObjectId())) {
 				final var loc = tvt().getParticipationNpcLoc();
-				playerInstance.setXYZInvisible((loc.getX() + Rnd.get(101)) - 50, (loc.getY() + Rnd.get(101)) - 50, loc.getZ());
+				playerInstance.setLocationInvisible((loc.getX() + Rnd.get(101)) - 50, (loc.getY() + Rnd.get(101)) - 50, loc.getZ(), loc.getHeading(), loc.getInstanceId());
 			}
 		}
 	}

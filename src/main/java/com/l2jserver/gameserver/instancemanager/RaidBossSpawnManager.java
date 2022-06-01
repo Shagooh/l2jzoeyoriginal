@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -78,11 +78,8 @@ public class RaidBossSpawnManager {
 			var rs = s.executeQuery("SELECT * FROM raidboss_spawnlist ORDER BY boss_id")) {
 			while (rs.next()) {
 				final L2Spawn spawnDat = new L2Spawn(rs.getInt("boss_id"));
-				spawnDat.setX(rs.getInt("loc_x"));
-				spawnDat.setY(rs.getInt("loc_y"));
-				spawnDat.setZ(rs.getInt("loc_z"));
+				spawnDat.setLocation(rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"), rs.getInt("heading"));
 				spawnDat.setAmount(rs.getInt("amount"));
-				spawnDat.setHeading(rs.getInt("heading"));
 				spawnDat.setRespawnDelay(rs.getInt("respawn_delay"), rs.getInt("respawn_random"));
 				
 				addNewSpawn(spawnDat, rs.getLong("respawn_time"), rs.getDouble("currentHP"), rs.getDouble("currentMP"), false);

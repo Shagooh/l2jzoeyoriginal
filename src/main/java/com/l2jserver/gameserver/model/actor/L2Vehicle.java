@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -120,8 +120,7 @@ public abstract class L2Vehicle extends L2Character {
 				final VehiclePathPoint point = _currentPath[_runState];
 				if (!isMovementDisabled()) {
 					if (point.getMoveSpeed() == 0) {
-						point.setHeading(point.getRotationSpeed());
-						teleToLocation(point, false);
+						teleToLocation(point.getX(), point.getY(), point.getZ(), point.getRotationSpeed(), point.getInstanceId(), false);
 						_currentPath = null;
 					} else {
 						if (point.getMoveSpeed() > 0) {

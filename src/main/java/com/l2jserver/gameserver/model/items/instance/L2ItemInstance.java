@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -1323,22 +1323,22 @@ public final class L2ItemInstance extends L2Object {
 			assert _itm.getWorldRegion() == null;
 			
 			if (_dropper != null) {
-				Location dropDest = GeoData.getInstance().moveCheck(_dropper.getX(), _dropper.getY(), _dropper.getZ(), _x, _y, _z, _dropper.getInstanceId());
+				Location dropDest = GeoData.getInstance().moveCheck(_dropper, _x, _y, _z);
 				_x = dropDest.getX();
 				_y = dropDest.getY();
 				_z = dropDest.getZ();
 			}
 			
-			if (_dropper != null) {
+/*			if (_dropper != null) {
 				setInstanceId(_dropper.getInstanceId()); // Inherit instance zone when dropped in visible world
 			} else {
 				setInstanceId(0); // No dropper? Make it a global item...
-			}
+			}*/
 			
 			synchronized (_itm) {
 				// Set the x,y,z position of the L2ItemInstance dropped and update its _worldregion
 				_itm.setIsVisible(true);
-				_itm.setXYZ(_x, _y, _z);
+				_itm.setLocation(_x, _y, _z, 0, _dropper != null ?_dropper.getInstanceId() : 0);
 				_itm.setWorldRegion(L2World.getInstance().getRegion(getLocation()));
 				
 				// Add the L2ItemInstance dropped to _visibleObjects of its L2WorldRegion

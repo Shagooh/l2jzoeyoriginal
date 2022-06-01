@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -23,7 +23,8 @@ import java.util.List;
 
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Character;
-import com.l2jserver.gameserver.model.interfaces.IPositionable;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
+import com.l2jserver.gameserver.model.interfaces.IPosition;
 
 /**
  * MagicSkillUse server packet implementation.
@@ -36,13 +37,17 @@ public final class MagicSkillUse extends L2GameServerPacket {
 	private final int _hitTime;
 	private final int _reuseDelay;
 	private final L2Character _activeChar;
+	private final IImmutablePosition _acPos; 
 	private final L2Character _target;
+	private final IImmutablePosition _tPos; 
 	private final List<Integer> _unknown = Collections.emptyList();
 	private final List<Location> _groundLocations;
 	
 	public MagicSkillUse(L2Character cha, L2Character target, int skillId, int skillLevel, int hitTime, int reuseDelay) {
 		_activeChar = cha;
+		_acPos = cha.getImmutablePosition();
 		_target = target;
+		_tPos = target.getImmutablePosition();
 		_skillId = skillId;
 		_skillLevel = skillLevel;
 		_hitTime = hitTime;
@@ -63,15 +68,15 @@ public final class MagicSkillUse extends L2GameServerPacket {
 		writeD(_skillLevel);
 		writeD(_hitTime);
 		writeD(_reuseDelay);
-		writeLoc(_activeChar);
+		writeLoc(_acPos);
 		writeH(_unknown.size()); // TODO: Implement me!
 		for (int unknown : _unknown) {
 			writeH(unknown);
 		}
 		writeH(_groundLocations.size());
-		for (IPositionable target : _groundLocations) {
+		for (IPosition target : _groundLocations) {
 			writeLoc(target);
 		}
-		writeLoc(_target);
+		writeLoc(_tPos);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -47,7 +47,15 @@ public class TerritoryTable {
 	 * @return the random point
 	 */
 	public Location getRandomPoint(int terr) {
-		return _territory.get(terr).getRandomPoint();
+		return getRandomPoint(terr, false);
+	}
+	
+	public Location getRandomPoint(int terr, boolean geoCorrection) {
+		return getRandomPoint(terr, -1, Integer.MIN_VALUE, geoCorrection);
+	}
+	
+	public Location getRandomPoint(int terr, int heading, int instanceId, boolean geoCorrection) {
+		return _territory.get(terr).getRandomPoint(heading, instanceId, geoCorrection);
 	}
 	
 	/**

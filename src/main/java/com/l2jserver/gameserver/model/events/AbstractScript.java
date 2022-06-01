@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -106,6 +106,7 @@ import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.model.holders.ItemHolder;
 import com.l2jserver.gameserver.model.holders.QuestItemChanceHolder;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
+import com.l2jserver.gameserver.model.interfaces.ILocational;
 import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.interfaces.IPositionable;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
@@ -1429,7 +1430,7 @@ public abstract class AbstractScript implements INamable {
 	 * @see #addSpawn(int, IPositionable, boolean, long, boolean, int)
 	 * @see #addSpawn(int, int, int, int, int, boolean, long, boolean, int)
 	 */
-	public static L2Npc addSpawn(int npcId, IPositionable pos) {
+	public static L2Npc addSpawn(int npcId, ILocational pos) {
 		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), false, 0, false, 0);
 	}
 	
@@ -1442,7 +1443,7 @@ public abstract class AbstractScript implements INamable {
 	 * @param despawnDelay time in milliseconds till the NPC is despawned (0 - only despawned on server shutdown)
 	 * @return the {@link L2Npc} object of the newly spawned NPC, {@code null} if the NPC doesn't exist
 	 */
-	public static L2Npc addSpawn(L2Npc summoner, int npcId, IPositionable pos, boolean randomOffset, long despawnDelay) {
+	public static L2Npc addSpawn(L2Npc summoner, int npcId, ILocational pos, boolean randomOffset, long despawnDelay) {
 		return addSpawn(summoner, npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), randomOffset, despawnDelay, false, 0);
 	}
 	
@@ -1455,7 +1456,7 @@ public abstract class AbstractScript implements INamable {
 	 * @see #addSpawn(int, IPositionable, boolean, long, boolean, int)
 	 * @see #addSpawn(int, int, int, int, int, boolean, long, boolean, int)
 	 */
-	public static L2Npc addSpawn(int npcId, IPositionable pos, boolean isSummonSpawn) {
+	public static L2Npc addSpawn(int npcId, ILocational pos, boolean isSummonSpawn) {
 		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), false, 0, isSummonSpawn, 0);
 	}
 	
@@ -1469,7 +1470,7 @@ public abstract class AbstractScript implements INamable {
 	 * @see #addSpawn(int, IPositionable, boolean, long, boolean, int)
 	 * @see #addSpawn(int, int, int, int, int, boolean, long, boolean, int)
 	 */
-	public static L2Npc addSpawn(int npcId, IPositionable pos, boolean randomOffset, long despawnDelay) {
+	public static L2Npc addSpawn(int npcId, ILocational pos, boolean randomOffset, long despawnDelay) {
 		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), randomOffset, despawnDelay, false, 0);
 	}
 	
@@ -1484,7 +1485,7 @@ public abstract class AbstractScript implements INamable {
 	 * @see #addSpawn(int, IPositionable, boolean, long, boolean, int)
 	 * @see #addSpawn(int, int, int, int, int, boolean, long, boolean, int)
 	 */
-	public static L2Npc addSpawn(int npcId, IPositionable pos, boolean randomOffset, long despawnDelay, boolean isSummonSpawn) {
+	public static L2Npc addSpawn(int npcId, ILocational pos, boolean randomOffset, long despawnDelay, boolean isSummonSpawn) {
 		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), randomOffset, despawnDelay, isSummonSpawn, 0);
 	}
 	
@@ -1503,8 +1504,12 @@ public abstract class AbstractScript implements INamable {
 	 * @see #addSpawn(int, IPositionable, boolean, long, boolean)
 	 * @see #addSpawn(int, int, int, int, int, boolean, long, boolean, int)
 	 */
-	public static L2Npc addSpawn(int npcId, IPositionable pos, boolean randomOffset, long despawnDelay, boolean isSummonSpawn, int instanceId) {
+	public static L2Npc addSpawn(int npcId, ILocational pos, boolean randomOffset, long despawnDelay, boolean isSummonSpawn, int instanceId) {
 		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), pos.getHeading(), randomOffset, despawnDelay, isSummonSpawn, instanceId);
+	}
+	
+	public static L2Npc addSpawn(int npcId, ILocational pos, int heading, boolean randomOffset, long despawnDelay, boolean isSummonSpawn, int instanceId) {
+		return addSpawn(npcId, pos.getX(), pos.getY(), pos.getZ(), heading, randomOffset, despawnDelay, isSummonSpawn, instanceId);
 	}
 	
 	/**
@@ -1601,11 +1606,7 @@ public abstract class AbstractScript implements INamable {
 			}
 			
 			final L2Spawn spawn = new L2Spawn(npcId);
-			spawn.setInstanceId(instanceId);
-			spawn.setHeading(heading);
-			spawn.setX(x);
-			spawn.setY(y);
-			spawn.setZ(z);
+			spawn.setLocation(x,y,z,heading,instanceId);
 			spawn.stopRespawn();
 			
 			final L2Npc npc = spawn.spawnOne(isSummonSpawn);
@@ -1636,12 +1637,11 @@ public abstract class AbstractScript implements INamable {
 	 */
 	public L2TrapInstance addTrap(int trapId, int x, int y, int z, int heading, Skill skill, int instanceId) {
 		final L2NpcTemplate npcTemplate = NpcData.getInstance().getTemplate(trapId);
-		L2TrapInstance trap = new L2TrapInstance(npcTemplate, instanceId, -1);
+		L2TrapInstance trap = new L2TrapInstance(npcTemplate, -1);
 		trap.setCurrentHp(trap.getMaxHp());
 		trap.setCurrentMp(trap.getMaxMp());
 		trap.setIsInvul(true);
-		trap.setHeading(heading);
-		trap.spawnMe(x, y, z);
+		trap.spawnMe(x, y, z, heading, instanceId);
 		return trap;
 	}
 	

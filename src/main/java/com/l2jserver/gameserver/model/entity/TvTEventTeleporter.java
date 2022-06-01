@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -83,16 +83,16 @@ public class TvTEventTeleporter implements Runnable {
 		int TvTInstance = TvTEvent.getTvTEventInstance();
 		if (TvTInstance != 0) {
 			if (TvTEvent.isStarted() && !_adminRemove) {
-				_playerInstance.setInstanceId(TvTInstance);
+				//_playerInstance.setInstanceId(TvTInstance);
 			} else {
-				_playerInstance.setInstanceId(0);
+				TvTInstance = 0;//_playerInstance.setInstanceId(0);
 			}
 		} else {
-			_playerInstance.setInstanceId(0);
+			TvTInstance = 0;//_playerInstance.setInstanceId(0);
 		}
 		
 		_playerInstance.doRevive();
-		_playerInstance.teleToLocation(_loc, true);
+		_playerInstance.teleToLocation(_loc, TvTInstance, true);
 		
 		if (TvTEvent.isStarted() && !_adminRemove) {
 			int teamId = TvTEvent.getParticipantTeamId(_playerInstance.getObjectId()) + 1;

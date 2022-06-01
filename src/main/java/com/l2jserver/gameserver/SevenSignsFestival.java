@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -1863,10 +1863,7 @@ public class SevenSignsFestival implements SpawnListener {
 			try {
 				L2Spawn npcSpawn = new L2Spawn(_witchSpawn._npcId);
 				
-				npcSpawn.setX(_witchSpawn._x);
-				npcSpawn.setY(_witchSpawn._y);
-				npcSpawn.setZ(_witchSpawn._z);
-				npcSpawn.setHeading(_witchSpawn._heading);
+				npcSpawn.setLocation(_witchSpawn._x, _witchSpawn._y, _witchSpawn._z, _witchSpawn._heading);
 				npcSpawn.setAmount(1);
 				npcSpawn.setRespawnDelay(1);
 				
@@ -1960,10 +1957,7 @@ public class SevenSignsFestival implements SpawnListener {
 				try {
 					L2Spawn npcSpawn = new L2Spawn(currSpawn._npcId);
 					
-					npcSpawn.setX(currSpawn._x);
-					npcSpawn.setY(currSpawn._y);
-					npcSpawn.setZ(currSpawn._z);
-					npcSpawn.setHeading(Rnd.nextInt(65536));
+					npcSpawn.setLocation(currSpawn._x, currSpawn._y, currSpawn._z, Rnd.nextInt(65536));
 					npcSpawn.setAmount(1);
 					npcSpawn.setRespawnDelay(respawnDelay);
 					

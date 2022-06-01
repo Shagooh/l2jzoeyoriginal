@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -229,10 +229,9 @@ public final class RequestRestartPoint extends L2GameClientPacket {
 		
 		// Teleport and revive
 		if (loc != null) {
-			activeChar.setInstanceId(instanceId);
 			activeChar.setIsIn7sDungeon(false);
 			activeChar.setIsPendingRevive(true);
-			activeChar.teleToLocation(loc, true);
+			activeChar.teleToLocation(loc, instanceId, true);
 		}
 	}
 	

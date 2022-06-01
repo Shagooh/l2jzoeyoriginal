@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -20,7 +20,6 @@ package com.l2jserver.gameserver.model;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.enums.ShotType;
@@ -39,6 +38,7 @@ import com.l2jserver.gameserver.model.entity.Instance;
 import com.l2jserver.gameserver.model.events.ListenersContainer;
 import com.l2jserver.gameserver.model.interfaces.IDecayable;
 import com.l2jserver.gameserver.model.interfaces.IIdentifiable;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
 import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.interfaces.IPositionable;
@@ -66,15 +66,16 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	private InstanceType _instanceType = null;
 	private volatile Map<String, Object> _scripts;
 	/** X coordinate */
-	private final AtomicInteger _x = new AtomicInteger(0);
+	//private final AtomicInteger _x = new AtomicInteger(0);
 	/** Y coordinate */
-	private final AtomicInteger _y = new AtomicInteger(0);
+	//private final AtomicInteger _y = new AtomicInteger(0);
 	/** Z coordinate */
-	private final AtomicInteger _z = new AtomicInteger(0);
+	//private final AtomicInteger _z = new AtomicInteger(0);
 	/** Orientation */
-	private final AtomicInteger _heading = new AtomicInteger(0);
+	//private final AtomicInteger _heading = new AtomicInteger(0);
 	/** Instance id of object. 0 - Global */
-	private final AtomicInteger _instanceId = new AtomicInteger(0);
+	//private final AtomicInteger _instanceId = new AtomicInteger(0);
+	private Location _loc = new Location(0, 0, 0, 0, 0);
 	private boolean _isVisible;
 	private boolean _isInvisible;
 	private ObjectKnownList _knownList;
@@ -191,13 +192,21 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	}
 	
 	public final void spawnMe(int x, int y, int z) {
+		spawnMe(x, y, z, 0, -1);
+	}
+	
+	public final void spawnMe(int x, int y, int z, int heading, int instanceId) {
+		spawnMe(new Location(x, y, z, heading, instanceId));
+	}
+	
+	public final void spawnMe(Location loc) {
 		assert getWorldRegion() == null;
 		
 		synchronized (this) {
 			// Set the x,y,z position of the L2Object spawn and update its _worldregion
 			_isVisible = true;
 			
-			if (x > L2World.MAP_MAX_X) {
+/*			if (x > L2World.MAP_MAX_X) {
 				x = L2World.MAP_MAX_X - 5000;
 			}
 			if (x < L2World.MAP_MIN_X) {
@@ -208,10 +217,10 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 			}
 			if (y < L2World.MAP_MIN_Y) {
 				y = L2World.MAP_MIN_Y + 5000;
-			}
+			}*/
 			
-			setXYZ(x, y, z);
-			setWorldRegion(L2World.getInstance().getRegion(getLocation()));
+			setLocation(loc);
+			setWorldRegion(L2World.getInstance().getRegion(loc.getX(), loc.getY()));
 			
 			// Add the L2Object spawn in the _allobjects of L2World
 		}
@@ -511,7 +520,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 		}
 	}
 	
-	public final void setXYZInvisible(int x, int y, int z) {
+	public final void setLocationInvisible(int x, int y, int z, int heading, int instanceId) {
 		assert getWorldRegion() == null;
 		if (x > L2World.MAP_MAX_X) {
 			x = L2World.MAP_MAX_X - 5000;
@@ -526,12 +535,12 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 			y = L2World.MAP_MIN_Y + 5000;
 		}
 		
-		setXYZ(x, y, z);
+		setLocation(x, y, z, heading, instanceId);
 		setIsVisible(false);
 	}
 	
 	public final void setLocationInvisible(ILocational loc) {
-		setXYZInvisible(loc.getX(), loc.getY(), loc.getZ());
+		setLocationInvisible(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), loc.getInstanceId());
 	}
 	
 	public void updateWorldRegion() {
@@ -573,7 +582,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public int getX() {
-		return _x.get();
+		return _loc.getX();
 	}
 	
 	/**
@@ -582,7 +591,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public int getY() {
-		return _y.get();
+		return _loc.getY();
 	}
 	
 	/**
@@ -591,7 +600,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public int getZ() {
-		return _z.get();
+		return _loc.getZ();
 	}
 	
 	/**
@@ -600,7 +609,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public int getHeading() {
-		return _heading.get();
+		return _loc.getHeading();
 	}
 	
 	/**
@@ -609,7 +618,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public int getInstanceId() {
-		return _instanceId.get();
+		return _loc.getInstanceId();
 	}
 	
 	/**
@@ -618,34 +627,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public Location getLocation() {
-		return new Location(getX(), getY(), getZ(), getHeading(), getInstanceId());
-	}
-	
-	/**
-	 * Sets the X coordinate
-	 * @param newX the X coordinate
-	 */
-	@Override
-	public void setX(int newX) {
-		_x.set(newX);
-	}
-	
-	/**
-	 * Sets the Y coordinate
-	 * @param newY the Y coordinate
-	 */
-	@Override
-	public void setY(int newY) {
-		_y.set(newY);
-	}
-	
-	/**
-	 * Sets the Z coordinate
-	 * @param newZ the Z coordinate
-	 */
-	@Override
-	public void setZ(int newZ) {
-		_z.set(newZ);
+		return _loc;
 	}
 	
 	/**
@@ -658,9 +640,8 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	public final void setXYZ(int newX, int newY, int newZ) {
 		assert getWorldRegion() != null;
 		
-		setX(newX);
-		setY(newY);
-		setZ(newZ);
+		ILocational loc = getLocation();
+		setLocation(newX, newY, newZ, loc.getHeading(), loc.getInstanceId());
 		
 		try {
 			if (L2World.getInstance().getRegion(getLocation()) != getWorldRegion()) {
@@ -677,7 +658,26 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public void setXYZ(ILocational loc) {
-		setXYZ(loc.getX(), loc.getY(), loc.getZ());
+		IImmutablePosition pos = loc.getImmutablePosition();
+		setXYZ(pos.getX(), pos.getY(), pos.getZ());
+	}
+	
+	@Override
+	public void setLocation(int x, int y, int z, int heading, int instanceId) {
+		setLocation(new Location(x, y, z, heading, instanceId));
+	}
+	
+	/**
+	 * Sets location of object.
+	 * @param loc the location object
+	 */
+	@Override
+	public void setLocation(Location newLoc) {
+		Location oldLoc = getLocation();
+		_loc = newLoc;
+		if (newLoc.getInstanceId() != oldLoc.getInstanceId()) {
+			onChangedInstanceId(oldLoc.getInstanceId(), newLoc.getInstanceId());
+		}
 	}
 	
 	/**
@@ -686,55 +686,62 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	 */
 	@Override
 	public void setHeading(int newHeading) {
-		_heading.set(newHeading);
+		Location loc = getLocation();
+		_loc = new Location(loc, newHeading);
 	}
 	
 	/**
-	 * Sets the instance ID of object.<br>
+	 * Sets the instance ID of this object and executes required WorldRegion
+	 * changes.<br>
 	 * 0 - Global<br>
 	 * TODO: Add listener here.
 	 * @param instanceId the ID of the instance
 	 */
-	@Override
-	public void setInstanceId(int instanceId) {
-		if ((instanceId < 0) || (getInstanceId() == instanceId)) {
+	public void onChangedInstanceId(int oldInstanceId, int newInstanceId) {
+		if (oldInstanceId == newInstanceId) {
 			return;
 		}
 		
-		Instance oldI = InstanceManager.getInstance().getInstance(getInstanceId());
-		Instance newI = InstanceManager.getInstance().getInstance(instanceId);
+		Instance oldI = InstanceManager.getInstance().getInstance(oldInstanceId);
+		Instance newI = InstanceManager.getInstance().getInstance(newInstanceId);
+		if (oldI == null) {
+			throw new IllegalStateException("The current instance id has no coresponding instance object.");
+		}
 		if (newI == null) {
 			return;
 		}
 		
 		if (isPlayer()) {
 			final L2PcInstance player = getActingPlayer();
-			if ((getInstanceId() > 0) && (oldI != null)) {
+			if ((oldInstanceId > 0) && (oldI != null)) {
 				oldI.removePlayer(getObjectId());
 				if (oldI.isShowTimer()) {
 					sendInstanceUpdate(oldI, true);
 				}
 			}
-			if (instanceId > 0) {
+			if (newInstanceId > 0) {
 				newI.addPlayer(getObjectId());
 				if (newI.isShowTimer()) {
 					sendInstanceUpdate(newI, false);
 				}
 			}
 			if (player.hasSummon()) {
-				player.getSummon().setInstanceId(instanceId);
+				player.getSummon().setLocation(player);
 			}
 		} else if (isNpc()) {
 			final L2Npc npc = (L2Npc) this;
-			if ((getInstanceId() > 0) && (oldI != null)) {
+			if ((oldInstanceId > 0) && (oldI != null)) {
 				oldI.removeNpc(npc);
 			}
-			if (instanceId > 0) {
+			if (newInstanceId > 0) {
 				newI.addNpc(npc);
 			}
 		}
 		
-		_instanceId.set(instanceId);
+
+		// TODO: Prevent object creation while maintaining immutability of Location
+		//Location loc = getLocation();
+		//loc = new Location(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), instanceId);
 		if (_isVisible && (_knownList != null)) {
 			// We don't want some ugly looking disappear/appear effects, so don't update
 			// the knownlist here, but players usually enter instancezones through teleporting
@@ -744,19 +751,6 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 				spawnMe();
 			}
 		}
-	}
-	
-	/**
-	 * Sets location of object.
-	 * @param loc the location object
-	 */
-	@Override
-	public void setLocation(Location loc) {
-		_x.set(loc.getX());
-		_y.set(loc.getY());
-		_z.set(loc.getZ());
-		_heading.set(loc.getHeading());
-		_instanceId.set(loc.getInstanceId());
 	}
 	
 	/**
@@ -870,5 +864,9 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	@Override
 	public String toString() {
 		return getName() + " [" + getObjectId() + "]";
+	}
+	
+	public IImmutablePosition getImmutablePosition() {
+		return getLocation().getImmutablePosition();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -171,8 +171,7 @@ public abstract class AbstractOlympiadGame {
 			player.setIsOlympiadStart(false);
 			player.setOlympiadSide(par.getSide());
 			player.setOlympiadBuffCount(olympiad().getMaxBuffs());
-			loc.setInstanceId(OlympiadGameManager.getInstance().getOlympiadTask(id).getZone().getInstanceId());
-			player.teleToLocation(loc, false);
+			player.teleToLocation(loc, OlympiadGameManager.getInstance().getOlympiadTask(id).getZone().getInstanceId(), 0);
 			player.sendPacket(new ExOlympiadMode(2));
 		} catch (Exception e) {
 			_log.log(Level.WARNING, e.getMessage(), e);
@@ -352,8 +351,7 @@ public abstract class AbstractOlympiadGame {
 			return;
 		}
 		player.setIsPendingRevive(false);
-		player.setInstanceId(0);
-		player.teleToLocation(loc);
+		player.teleToLocation(loc, 0, false);
 		player.unsetLastLocation();
 	}
 	

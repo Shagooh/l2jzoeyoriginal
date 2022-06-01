@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -257,6 +257,7 @@ import com.l2jserver.gameserver.model.punishment.PunishmentAffect;
 import com.l2jserver.gameserver.model.punishment.PunishmentType;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import com.l2jserver.gameserver.model.quest.WellKnownQuest;
 import com.l2jserver.gameserver.model.skills.AbnormalType;
 import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.skills.CommonSkill;
@@ -368,9 +369,9 @@ public final class L2PcInstance extends L2Playable {
 	/** Premium Items */
 	private final Map<Integer, L2PremiumItem> _premiumItems = new ConcurrentHashMap<>();
 	/** Location before entering Observer Mode */
-	private final Location _lastLoc = new Location(0, 0, 0);
+	private Location _lastLoc = new Location(0, 0, 0);
 	/** Stored from last ValidatePosition **/
-	private final Location _lastServerPosition = new Location(0, 0, 0);
+	private Location _lastServerPosition = new Location(0, 0, 0);
 	private final PcInventory _inventory = new PcInventory(this);
 	private final PcFreight _freight = new PcFreight(this);
 	/** The table containing all Quests began by the L2PcInstance */
@@ -7150,11 +7151,11 @@ public final class L2PcInstance extends L2Playable {
 	}
 	
 	public void setLastLocation() {
-		_lastLoc.setXYZ(getX(), getY(), getZ());
+		_lastLoc = new Location(getX(), getY(), getZ());
 	}
 	
 	public void unsetLastLocation() {
-		_lastLoc.setXYZ(0, 0, 0);
+		_lastLoc = new Location(0, 0, 0);
 	}
 	
 	public void enterOlympiadObserverMode(Location loc, int id) {
@@ -7225,8 +7226,7 @@ public final class L2PcInstance extends L2Playable {
 		_observerMode = false;
 		setTarget(null);
 		sendPacket(new ExOlympiadMode(0));
-		setInstanceId(0);
-		teleToLocation(_lastLoc, true);
+		teleToLocation(_lastLoc, 0, true);
 		if (!isGM()) {
 			setInvisible(false);
 			setIsInvul(false);
@@ -7781,7 +7781,7 @@ public final class L2PcInstance extends L2Playable {
 			sendPacket(new EtcStatusUpdate(this));
 			
 			// if player has quest 422: Repent Your Sins, remove it
-			QuestState st = getQuestState("Q00422_RepentYourSins");
+			QuestState st = getQuestState(WellKnownQuest.REPENT_YOUR_SINS.getQuestName());
 			if (st != null) {
 				st.exitQuest(true);
 			}
@@ -8104,7 +8104,7 @@ public final class L2PcInstance extends L2Playable {
 		}
 		return level;
 	}
-	
+
 	@Override
 	public void teleToLocation(ILocational loc, boolean allowRandomOffset) {
 		if ((getVehicle() != null) && !getVehicle().isTeleporting()) {
@@ -8182,7 +8182,7 @@ public final class L2PcInstance extends L2Playable {
 	}
 	
 	public void setLastServerPosition(int x, int y, int z) {
-		_lastServerPosition.setXYZ(x, y, z);
+		_lastServerPosition = new Location(x, y, z);
 	}
 	
 	public Location getLastServerPosition() {
@@ -8632,11 +8632,10 @@ public final class L2PcInstance extends L2Playable {
 					if (loc != null) {
 						final int x = loc.getX() + Rnd.get(-30, 30);
 						final int y = loc.getY() + Rnd.get(-30, 30);
-						setXYZInvisible(x, y, loc.getZ());
+						setLocationInvisible(x, y, loc.getZ(), getHeading(), 0);
 						if (hasSummon()) // dead pet
 						{
-							getSummon().teleToLocation(loc, true);
-							getSummon().setInstanceId(0);
+							getSummon().teleToLocation(loc, 0, true);
 						}
 					}
 				}

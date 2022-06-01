@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -32,7 +32,9 @@ import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.Location;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
+import com.l2jserver.gameserver.model.interfaces.IPosition;
 import com.l2jserver.gameserver.util.GeoUtils;
 import com.l2jserver.gameserver.util.LinePointIterator;
 import com.l2jserver.gameserver.util.LinePointIterator3D;
@@ -202,11 +204,20 @@ public class GeoData {
 	
 	/**
 	 * Gets the spawn height.
-	 * @param location the location
+	 * @param pos the immutable position
 	 * @return the spawn height
 	 */
-	public int getSpawnHeight(Location location) {
-		return getSpawnHeight(location.getX(), location.getY(), location.getZ());
+	public int getSpawnHeight(IImmutablePosition pos) {
+		return getSpawnHeight(pos.getX(), pos.getY(), pos.getZ());
+	}
+	
+	/**
+	 * Gets the spawn height.
+	 * @param pos the position
+	 * @return the spawn height
+	 */
+	public int getSpawnHeight(IPosition pos) {
+		return getSpawnHeight(pos.getImmutablePosition());
 	}
 	
 	/**
@@ -222,17 +233,17 @@ public class GeoData {
 		if (target.isDoor()) {
 			return true;
 		}
-		return canSeeTarget(cha.getX(), cha.getY(), cha.getZ(), cha.getInstanceId(), target.getX(), target.getY(), target.getZ(), target.getInstanceId());
+		return canSeeTarget(cha.getLocation(), target.getLocation());
 	}
 	
 	/**
 	 * Can see target. Checks doors between.
-	 * @param cha the character
-	 * @param worldPosition the world position
+	 * @param src source position
+	 * @param dst destination position
 	 * @return {@code true} if the character can see the target at the given world position, {@code false} otherwise
 	 */
-	public boolean canSeeTarget(L2Object cha, ILocational worldPosition) {
-		return canSeeTarget(cha.getX(), cha.getY(), cha.getZ(), cha.getInstanceId(), worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
+	public boolean canSeeTarget(ILocational src, ILocational dst) {
+		return canSeeTarget(src.getX(), src.getY(), src.getZ(), src.getInstanceId(), dst.getX(), dst.getY(), dst.getZ(), dst.getInstanceId());
 	}
 	
 	/**
@@ -407,7 +418,14 @@ public class GeoData {
 	 * @return the destination if there is a path or the closes location
 	 */
 	public Location moveCheck(ILocational origin, ILocational destination) {
-		return moveCheck(origin.getX(), origin.getY(), origin.getZ(), destination.getX(), destination.getY(), destination.getZ(), origin.getInstanceId());
+		Location src = origin.getLocation();
+		Location dst = destination.getLocation();
+		return moveCheck(src, dst.getX(), dst.getY(), dst.getZ());
+	}
+	
+	public Location moveCheck(ILocational origin, int x, int y, int z) {
+		Location src = origin.getLocation();
+		return moveCheck(src.getX(), src.getY(), src.getZ(), x, y, z, src.getInstanceId());
 	}
 	
 	/**
@@ -561,7 +579,7 @@ public class GeoData {
 	public boolean canMove(ILocational from, ILocational to) {
 		return canMove(from, to.getX(), to.getY(), to.getZ());
 	}
-	
+
 	/**
 	 * Checks the specified position for available geodata.
 	 * @param x the X coordinate

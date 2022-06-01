@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -69,10 +69,9 @@ public final class L2TrapInstance extends L2Npc {
 	 * @param instanceId the instance ID
 	 * @param lifeTime the life time
 	 */
-	public L2TrapInstance(L2NpcTemplate template, int instanceId, int lifeTime) {
+	public L2TrapInstance(L2NpcTemplate template, int lifeTime) {
 		super(template);
 		setInstanceType(InstanceType.L2TrapInstance);
-		setInstanceId(instanceId);
 		setName(template.getName());
 		setIsInvul(false);
 		
@@ -82,7 +81,7 @@ public final class L2TrapInstance extends L2Npc {
 		_hasLifeTime = lifeTime >= 0;
 		_lifeTime = lifeTime != 0 ? lifeTime : 30000;
 		_remainingTime = _lifeTime;
-		if (_skill != null) {
+		if (_skill != null) { 
 			_trapTask = ThreadPoolManager.getInstance().scheduleGeneralAtFixedRate(new TrapTask(this), TICK, TICK);
 		}
 	}
@@ -94,7 +93,7 @@ public final class L2TrapInstance extends L2Npc {
 	 * @param lifeTime the life time
 	 */
 	public L2TrapInstance(L2NpcTemplate template, L2PcInstance owner, int lifeTime) {
-		this(template, owner.getInstanceId(), lifeTime);
+		this(template, lifeTime);
 		_owner = owner;
 	}
 	

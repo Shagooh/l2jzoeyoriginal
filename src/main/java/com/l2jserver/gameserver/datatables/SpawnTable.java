@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -254,10 +254,7 @@ public final class SpawnTable implements IXmlReader {
 		try {
 			spawnDat = new L2Spawn(spawnInfo.getInt("npcTemplateid"));
 			spawnDat.setAmount(spawnInfo.getInt("count", 1));
-			spawnDat.setX(spawnInfo.getInt("x", 0));
-			spawnDat.setY(spawnInfo.getInt("y", 0));
-			spawnDat.setZ(spawnInfo.getInt("z", 0));
-			spawnDat.setHeading(spawnInfo.getInt("heading", -1));
+			spawnDat.setLocation(spawnInfo.getInt("x", 0), spawnInfo.getInt("y", 0), spawnInfo.getInt("z", 0), spawnInfo.getInt("heading", -1));
 			spawnDat.setRespawnDelay(spawnInfo.getInt("respawnDelay", 0), spawnInfo.getInt("respawnRandom", 0));
 			spawnDat.setLocationId(spawnInfo.getInt("locId", 0));
 			String territoryName = spawnInfo.getString("territoryName", "");

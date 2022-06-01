@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -41,7 +41,7 @@ import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.templates.L2NpcTemplate;
 import com.l2jserver.gameserver.model.interfaces.IIdentifiable;
-import com.l2jserver.gameserver.model.interfaces.ILocational;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.interfaces.IPositionable;
 import com.l2jserver.gameserver.model.zone.type.NpcSpawnTerritory;
@@ -69,7 +69,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	/** The identifier of the location area where L2NpcInstance can be spwaned */
 	private int _locationId;
 	/** The Location of this NPC spawn. */
-	private Location _location = new Location(0, 0, 0, 0, 0);
+	private Location _location = new Location(0, 0, 0);
 	/** Link to NPC spawn territory */
 	private NpcSpawnTerritory _spawnTerritory = null;
 	/** Minimum respawn delay */
@@ -208,15 +208,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 		return getLocation(obj).getX();
 	}
 	
-	/**
-	 * Set the X position of the spawn point.
-	 * @param x the x coordinate
-	 */
-	@Override
-	public void setX(int x) {
-		_location.setX(x);
-	}
-	
 	@Override
 	public int getY() {
 		return _location.getY();
@@ -228,15 +219,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	 */
 	public int getY(L2Object obj) {
 		return getLocation(obj).getY();
-	}
-	
-	/**
-	 * Set the Y position of the spawn point.
-	 * @param y the y coordinate
-	 */
-	@Override
-	public void setY(int y) {
-		_location.setY(y);
 	}
 	
 	@Override
@@ -253,15 +235,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	}
 	
 	/**
-	 * Set the Z position of the spawn point.
-	 * @param z the z coordinate
-	 */
-	@Override
-	public void setZ(int z) {
-		_location.setZ(z);
-	}
-	
-	/**
 	 * Set the x, y, z position of the spawn point.
 	 * @param x The x coordinate.
 	 * @param y The y coordinate.
@@ -269,18 +242,8 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	 */
 	@Override
 	public void setXYZ(int x, int y, int z) {
-		setX(x);
-		setY(y);
-		setZ(z);
-	}
-	
-	/**
-	 * Set the x, y, z position of the spawn point.
-	 * @param loc The location.
-	 */
-	@Override
-	public void setXYZ(ILocational loc) {
-		setXYZ(loc.getX(), loc.getY(), loc.getZ());
+		Location loc = getLocation();
+		_location = new Location(x, y, z, loc.getHeading(), loc.getInstanceId());
 	}
 	
 	/**
@@ -297,7 +260,13 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	 */
 	@Override
 	public void setHeading(int heading) {
-		_location.setHeading(heading);
+		Location loc = getLocation();
+		_location = new Location(loc.getX(), loc.getY(), loc.getZ(), heading, loc.getInstanceId());
+	}
+	
+	@Override
+	public void setLocation(int x, int y, int z, int heading, int instanceId) {
+		setLocation(new Location(x, y, z, heading, instanceId));
 	}
 	
 	/**
@@ -497,7 +466,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 			
 			// Call the constructor of the L2Npc
 			L2Npc npc = _constructor.newInstance(_template);
-			npc.setInstanceId(getInstanceId()); // Must be done before object is spawned into visible world
 			if (isSummonSpawn) {
 				npc.setShowSummonAnimation(isSummonSpawn);
 			}
@@ -507,7 +475,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 				NpcPersonalAIData.getInstance().initializeNpcParameters(npc, this, _name);
 			}
 			
-			return initializeNpcInstance(npc);
+			return initializeNpcInstance(npc, getInstanceId());
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "NPC " + _template.getId() + " class not found", e);
 		}
@@ -518,7 +486,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	 * @param mob
 	 * @return
 	 */
-	private L2Npc initializeNpcInstance(L2Npc mob) {
+	private L2Npc initializeNpcInstance(L2Npc mob, int instanceId) {
 		int newlocx = 0;
 		int newlocy = 0;
 		int newlocz = 0;
@@ -529,7 +497,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 			int[] p = _spawnTerritory.getRandomPoint();
 			newlocx = p[0];
 			newlocy = p[1];
-			newlocz = p[2];
+			newlocz = mob.isFlying() ? p[2] : GeoData.getInstance().getSpawnHeight(p[0], p[1], p[2]);
 		}
 		// Old method (for backward compatibility)
 		else if ((getX() == 0) && (getY() == 0)) {
@@ -538,7 +506,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 			}
 			
 			// Calculate the random position in the location area
-			final Location location = TerritoryTable.getInstance().getRandomPoint(getLocationId());
+			final Location location = TerritoryTable.getInstance().getRandomPoint(getLocationId(), !mob.isFlying());
 			
 			// Set the calculated position of the L2NpcInstance
 			if (location != null) {
@@ -551,11 +519,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 			newlocx = getX();
 			newlocy = getY();
 			newlocz = getZ();
-		}
-		
-		// don't correct z of flying npc's
-		if (!mob.isFlying()) {
-			newlocz = GeoData.getInstance().getSpawnHeight(newlocx, newlocy, newlocz);
 		}
 		
 		mob.stopAllEffects();
@@ -573,10 +536,11 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 		mob.setIsNoRndWalk(isNoRndWalk());
 		
 		// Set the heading of the L2NpcInstance (random heading if not defined)
+		int heading = 0;
 		if (getHeading() == -1) {
-			mob.setHeading(Rnd.nextInt(61794));
+			heading = Rnd.nextInt(61794);
 		} else {
-			mob.setHeading(getHeading());
+			heading = getHeading();
 		}
 		
 		if (mob instanceof L2Attackable) {
@@ -604,13 +568,13 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 		mob.setSpawn(this);
 		
 		// Spawn NPC
-		mob.spawnMe(newlocx, newlocy, newlocz);
+		mob.spawnMe(newlocx, newlocy, newlocz, heading, instanceId);
 		
 		notifyNpcSpawned(mob);
 		
 		_spawnedNpcs.add(mob);
 		if (_lastSpawnPoints != null) {
-			_lastSpawnPoints.put(mob.getObjectId(), new Location(newlocx, newlocy, newlocz));
+			_lastSpawnPoints.put(mob.getObjectId(), mob.getLocation());
 		}
 		
 		if (general().debug()) {
@@ -698,7 +662,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	public void respawnNpc(L2Npc oldNpc) {
 		if (_doRespawn) {
 			oldNpc.refreshID();
-			initializeNpcInstance(oldNpc);
+			initializeNpcInstance(oldNpc, oldNpc.getInstanceId());
 		}
 	}
 	
@@ -709,11 +673,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	@Override
 	public int getInstanceId() {
 		return _location.getInstanceId();
-	}
-	
-	@Override
-	public void setInstanceId(int instanceId) {
-		_location.setInstanceId(instanceId);
 	}
 	
 	public final boolean isNoRndWalk() {
@@ -743,5 +702,15 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	@Override
 	public String toString() {
 		return "L2Spawn ID: " + getId() + " " + getLocation();
+	}
+
+	@Override
+	public IImmutablePosition getImmutablePosition() {
+		return _location;
+	}
+
+	@Override
+	public void setXYZ(Location loc) {
+		setXYZ(loc.getX(), loc.getY(), loc.getZ());
 	}
 }

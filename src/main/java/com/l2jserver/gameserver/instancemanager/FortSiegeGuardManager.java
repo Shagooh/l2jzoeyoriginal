@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -89,10 +89,7 @@ public final class FortSiegeGuardManager {
 				while (rs.next()) {
 					final L2Spawn spawn = new L2Spawn(rs.getInt("npcId"));
 					spawn.setAmount(1);
-					spawn.setX(rs.getInt("x"));
-					spawn.setY(rs.getInt("y"));
-					spawn.setZ(rs.getInt("z"));
-					spawn.setHeading(rs.getInt("heading"));
+					spawn.setLocation(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("heading"));
 					spawn.setRespawnDelay(rs.getInt("respawnDelay"));
 					spawn.setLocationId(0);
 					

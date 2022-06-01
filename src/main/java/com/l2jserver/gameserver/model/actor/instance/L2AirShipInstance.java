@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -131,7 +131,7 @@ public class L2AirShipInstance extends L2Vehicle {
 			player.setXYZ(loc.getX(), loc.getY(), loc.getZ());
 			player.revalidateZone(true);
 		} else {
-			player.setXYZInvisible(loc.getX(), loc.getY(), loc.getZ());
+			player.setLocationInvisible(loc);
 		}
 	}
 	

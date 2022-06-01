@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -114,9 +114,7 @@ public final class MobGroup {
 				int randX = Rnd.nextInt(MobGroupTable.RANDOM_RANGE);
 				int randY = Rnd.nextInt(MobGroupTable.RANDOM_RANGE);
 				
-				spawn.setX(x + (signX * randX));
-				spawn.setY(y + (signY * randY));
-				spawn.setZ(z);
+				spawn.setXYZ(x + (signX * randX), y + (signY * randY), z);
 				spawn.stopRespawn();
 				
 				SpawnTable.getInstance().addNewSpawn(spawn, false);

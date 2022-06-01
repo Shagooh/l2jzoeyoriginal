@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -34,8 +34,8 @@ import com.l2jserver.gameserver.network.SystemMessageId;
  * @author durgus
  */
 public class L2JailZone extends L2ZoneType {
-	private static final Location JAIL_IN_LOC = new Location(-114356, -249645, -2984);
-	private static final Location JAIL_OUT_LOC = new Location(17836, 170178, -3507);
+	private static final Location JAIL_IN_LOC = new Location(-114356, -249645, -2984, 0, 0);
+	private static final Location JAIL_OUT_LOC = new Location(17836, 170178, -3507, 0, 0);
 	
 	public L2JailZone(int id) {
 		super(id);

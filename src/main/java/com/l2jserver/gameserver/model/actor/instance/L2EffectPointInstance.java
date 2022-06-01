@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -32,9 +32,6 @@ public class L2EffectPointInstance extends L2Npc {
 		setInstanceType(InstanceType.L2EffectPointInstance);
 		setIsInvul(false);
 		_owner = owner == null ? null : owner.getActingPlayer();
-		if (owner != null) {
-			setInstanceId(owner.getInstanceId());
-		}
 	}
 	
 	@Override

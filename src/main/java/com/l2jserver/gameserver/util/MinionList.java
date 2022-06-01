@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -300,13 +300,9 @@ public class MinionList {
 		
 		// Set the Minion HP, MP and Heading
 		minion.setCurrentHpMp(minion.getMaxHp(), minion.getMaxMp());
-		minion.setHeading(master.getHeading());
 		
 		// Set the Minion leader to this RaidBoss
 		minion.setLeader(master);
-		
-		// move monster to masters instance
-		minion.setInstanceId(master.getInstanceId());
 		
 		// Init the position of the Minion and add it in the world as a visible object
 		final int offset = 200;
@@ -326,7 +322,7 @@ public class MinionList {
 			newY = (master.getY() - newY) + minRadius;
 		}
 		
-		minion.spawnMe(newX, newY, master.getZ());
+		minion.spawnMe(newX, newY, master.getZ(), master.getHeading(), master.getInstanceId());
 		
 		if (general().debug()) {
 			_log.info("Spawned minion template " + minion.getId() + " with objid: " + minion.getObjectId() + " to boss " + master.getObjectId() + " ,at: " + minion.getX() + " x, " + minion.getY() + " y, " + minion.getZ() + " z");

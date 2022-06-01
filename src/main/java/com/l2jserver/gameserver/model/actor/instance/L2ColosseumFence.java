@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -42,8 +42,7 @@ public final class L2ColosseumFence extends L2Object {
 	
 	private L2ColosseumFence(int objectId, int instanceId, int x, int y, int z, int minZ, int maxZ, int width, int height, FenceState state) {
 		super(objectId);
-		setInstanceId(instanceId);
-		setXYZ(x, y, z);
+		setLocation(x, y, z, 0, instanceId);
 		_minZ = minZ;
 		_maxZ = maxZ;
 		_state = state;

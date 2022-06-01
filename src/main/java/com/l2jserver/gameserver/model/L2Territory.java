@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import com.l2jserver.commons.util.Rnd;
+import com.l2jserver.gameserver.GeoData;
 
 /**
  * @version 0.1, 2005-03-12
@@ -126,13 +127,33 @@ public class L2Territory {
 	}
 	
 	public Location getRandomPoint() {
+		return getRandomPoint(-1);
+	}
+	
+	public Location getRandomPoint(int heading) {
+		return getRandomPoint(heading, Integer.MIN_VALUE);
+	}
+	
+	public Location getRandomPoint(int heading, int instanceId) {
+		return getRandomPoint(heading, instanceId, false);
+	}
+	
+	public Location getRandomPoint(boolean geoCorrection) {
+		return getRandomPoint(-1, Integer.MIN_VALUE, geoCorrection);
+	}
+	
+	public Location getRandomPoint(int heading, int instanceId, boolean geoCorrection) {
+		int actualHeading = heading < 0 ? 0 : heading;
+		int actualInstanceId = instanceId == Integer.MIN_VALUE ? -1 : instanceId;
+
 		if (_procMax > 0) {
 			int pos = 0;
 			int rnd = Rnd.nextInt(_procMax);
 			for (Point p1 : _points) {
 				pos += p1._proc;
 				if (rnd <= pos) {
-					return new Location(p1._x, p1._y, Rnd.get(p1._zmin, p1._zmax));
+					int z = Rnd.get(p1._zmin, p1._zmax);
+					return new Location(p1._x, p1._y, geoCorrection ? GeoData.getInstance().getSpawnHeight(p1._x, p1._y, z) : z, actualHeading, actualInstanceId);
 				}
 			}
 			
@@ -150,7 +171,8 @@ public class L2Territory {
 						zmin = p1._zmin;
 					}
 				}
-				return new Location(x, y, Rnd.get(zmin, _zMax));
+				int z = Rnd.get(zmin, _zMax);
+				return new Location(x, y, geoCorrection ? GeoData.getInstance().getSpawnHeight(x, y, z) : z, actualHeading, actualInstanceId);
 			}
 		}
 		_log.warning("Can't make point for territory " + _terr);

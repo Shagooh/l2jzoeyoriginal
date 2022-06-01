@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -153,8 +153,9 @@ public class EnterWorld extends L2GameClientPacket {
 		getClient().setClientTracert(tracert);
 		
 		// Restore to instanced area if enabled
+		int spawnInstanceId = 0;
 		if (general().restorePlayerInstance()) {
-			activeChar.setInstanceId(InstanceManager.getInstance().getPlayerInstance(activeChar.getObjectId()));
+			spawnInstanceId = InstanceManager.getInstance().getPlayerInstance(activeChar.getObjectId());
 		} else {
 			int instanceId = InstanceManager.getInstance().getPlayerInstance(activeChar.getObjectId());
 			if (instanceId > 0) {
@@ -344,7 +345,7 @@ public class EnterWorld extends L2GameClientPacket {
 			activeChar.setProtection(true);
 		}
 		
-		activeChar.spawnMe(activeChar.getX(), activeChar.getY(), activeChar.getZ());
+		activeChar.spawnMe(activeChar.getX(), activeChar.getY(), activeChar.getZ(), activeChar.getHeading(), spawnInstanceId);
 		
 		activeChar.getInventory().applyItemSkills();
 		

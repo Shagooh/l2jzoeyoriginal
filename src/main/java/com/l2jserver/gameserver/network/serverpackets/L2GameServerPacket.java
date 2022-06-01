@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -21,7 +21,9 @@ package com.l2jserver.gameserver.network.serverpackets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.l2jserver.gameserver.model.interfaces.IPositionable;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
+import com.l2jserver.gameserver.model.interfaces.ILocational;
+import com.l2jserver.gameserver.model.interfaces.IPosition;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
 import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.mmocore.SendablePacket;
@@ -83,10 +85,24 @@ public abstract class L2GameServerPacket extends SendablePacket<L2GameClient> {
 	 * Writes 3 D (int32) with current location x, y, z
 	 * @param loc
 	 */
-	protected void writeLoc(IPositionable loc) {
-		writeD(loc.getX());
-		writeD(loc.getY());
-		writeD(loc.getZ());
+	protected void writeLoc(IPosition pos) {
+		writeLoc(pos.getImmutablePosition());
+	}
+	
+	protected void writeLoc(IImmutablePosition pos) {
+		writeD(pos.getX());
+		writeD(pos.getY());
+		writeD(pos.getZ());
+	}
+	
+	protected void writeLocWithHeading(IPosition pos, int heading) {
+		writeLoc(pos);
+		writeD(heading);
+	}
+	
+	protected void writeLocWithHeading(ILocational loc) {
+		writeLoc(loc);
+		writeD(loc.getHeading());
 	}
 	
 	protected int[] getPaperdollOrder() {

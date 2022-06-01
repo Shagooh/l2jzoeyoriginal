@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -32,6 +32,12 @@ public final class VehiclePathPoint extends Location {
 		super(x, y, z);
 		_moveSpeed = moveSpeed;
 		_rotationSpeed = rotationSpeed;
+	}
+	
+	public VehiclePathPoint(VehiclePathPoint point, int heading) {
+		super(point.getX(), point.getY(), point.getZ(), heading, point.getInstanceId());
+		_moveSpeed = point.getMoveSpeed();
+		_rotationSpeed = point.getRotationSpeed();
 	}
 	
 	public int getMoveSpeed() {

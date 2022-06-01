@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -251,9 +251,8 @@ public final class Instance {
 		}
 		
 		final L2DoorInstance newdoor = new L2DoorInstance(new L2DoorTemplate(set));
-		newdoor.setInstanceId(getId());
 		newdoor.setCurrentHp(newdoor.getMaxHp());
-		newdoor.spawnMe(newdoor.getTemplate().getX(), newdoor.getTemplate().getY(), newdoor.getTemplate().getZ());
+		newdoor.spawnMe(newdoor.getTemplate().getX(), newdoor.getTemplate().getY(), newdoor.getTemplate().getZ(), newdoor.getHeading(), getId());
 		_doors.put(doorId, newdoor);
 	}
 	
@@ -327,11 +326,10 @@ public final class Instance {
 		for (Integer objectId : _players) {
 			final L2PcInstance player = L2World.getInstance().getPlayer(objectId);
 			if ((player != null) && (player.getInstanceId() == getId())) {
-				player.setInstanceId(0);
 				if (getExitLoc() != null) {
-					player.teleToLocation(getExitLoc(), true);
+					player.teleToLocation(getExitLoc(), 0, true);
 				} else {
-					player.teleToLocation(TeleportWhereType.TOWN);
+					player.teleToLocation(TeleportWhereType.TOWN, 0);
 				}
 			}
 		}
@@ -525,18 +523,14 @@ public final class Instance {
 									}
 									
 									final L2Spawn spawnDat = new L2Spawn(npcId);
-									spawnDat.setX(x);
-									spawnDat.setY(y);
-									spawnDat.setZ(z);
+									spawnDat.setLocation(x, y, z, heading, getId());
 									spawnDat.setAmount(1);
-									spawnDat.setHeading(heading);
 									spawnDat.setRespawnDelay(respawn, respawnRandom);
 									if (respawn == 0) {
 										spawnDat.stopRespawn();
 									} else {
 										spawnDat.startRespawn();
 									}
-									spawnDat.setInstanceId(getId());
 									if (allowRandomWalk == null) {
 										spawnDat.setIsNoRndWalk(!_allowRandomWalk);
 									} else {
@@ -727,11 +721,10 @@ public final class Instance {
 		if ((player != null)) {
 			_ejectDeadTasks.put(player.getObjectId(), ThreadPoolManager.getInstance().scheduleGeneral(() -> {
 				if (player.isDead() && (player.getInstanceId() == getId())) {
-					player.setInstanceId(0);
 					if (getExitLoc() != null) {
-						player.teleToLocation(getExitLoc(), true);
+						player.teleToLocation(getExitLoc(), 0, true);
 					} else {
-						player.teleToLocation(TeleportWhereType.TOWN);
+						player.teleToLocation(TeleportWhereType.TOWN, 0);
 					}
 				}
 			}, _ejectTime));

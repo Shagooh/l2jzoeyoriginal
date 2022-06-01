@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -423,11 +423,8 @@ public final class BlockCheckerEngine {
 				// Creates 50 new blocks
 				for (int i = 0; i < _numOfBoxes; i++) {
 					final L2Spawn spawn = new L2Spawn(18672);
-					spawn.setX(_arenaCoordinates[_arena][4] + Rnd.get(-400, 400));
-					spawn.setY(_arenaCoordinates[_arena][5] + Rnd.get(-400, 400));
-					spawn.setZ(_zCoord);
+					spawn.setLocation(_arenaCoordinates[_arena][4] + Rnd.get(-400, 400), _arenaCoordinates[_arena][5] + Rnd.get(-400, 400), _zCoord, 1);
 					spawn.setAmount(1);
-					spawn.setHeading(1);
 					spawn.setRespawnDelay(1);
 					SpawnTable.getInstance().addNewSpawn(spawn, false);
 					spawn.init();
@@ -447,11 +444,8 @@ public final class BlockCheckerEngine {
 			if ((_round == 1) || (_round == 2)) {
 				try {
 					final L2Spawn girlSpawn = new L2Spawn(18676);
-					girlSpawn.setX(_arenaCoordinates[_arena][4] + Rnd.get(-400, 400));
-					girlSpawn.setY(_arenaCoordinates[_arena][5] + Rnd.get(-400, 400));
-					girlSpawn.setZ(_zCoord);
+					girlSpawn.setLocation(_arenaCoordinates[_arena][4] + Rnd.get(-400, 400), _arenaCoordinates[_arena][5] + Rnd.get(-400, 400), _zCoord, 1);
 					girlSpawn.setAmount(1);
-					girlSpawn.setHeading(1);
 					girlSpawn.setRespawnDelay(1);
 					SpawnTable.getInstance().addNewSpawn(girlSpawn, false);
 					girlSpawn.init();

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -32,11 +32,13 @@ import com.l2jserver.gameserver.model.actor.instance.L2MonsterInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2NpcInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2TrapInstance;
+import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 import com.l2jserver.gameserver.model.skills.AbnormalVisualEffect;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 
 public abstract class AbstractNpcInfo extends L2GameServerPacket {
-	protected int _x, _y, _z, _heading;
+	protected IImmutablePosition _pos;
+	protected int _heading;
 	protected int _idTemplate;
 	protected boolean _isAttackable, _isSummoned;
 	protected int _mAtkSpd, _pAtkSpd;
@@ -52,9 +54,7 @@ public abstract class AbstractNpcInfo extends L2GameServerPacket {
 	
 	public AbstractNpcInfo(L2Character cha) {
 		_isSummoned = cha.isShowSummonAnimation();
-		_x = cha.getX();
-		_y = cha.getY();
-		_z = cha.getZ();
+		_pos = cha.getImmutablePosition();
 		_heading = cha.getHeading();
 		_mAtkSpd = cha.getMAtkSpd();
 		_pAtkSpd = (int) cha.getPAtkSpd();
@@ -113,7 +113,7 @@ public abstract class AbstractNpcInfo extends L2GameServerPacket {
 			
 			// npc crest of owning clan/ally of castle
 			if ((cha instanceof L2NpcInstance) && cha.isInsideZone(ZoneId.TOWN) && (npc().showCrestWithoutQuest() || cha.getCastle().getShowNpcCrest()) && (cha.getCastle().getOwnerId() != 0)) {
-				int townId = TownManager.getTown(_x, _y, _z).getTownId();
+				int townId = TownManager.getTown(_pos.getX(), _pos.getY(), _pos.getZ()).getTownId();
 				if ((townId != 33) && (townId != 22)) {
 					L2Clan clan = ClanTable.getInstance().getClan(cha.getCastle().getOwnerId());
 					_clanCrest = clan.getCrestId();
@@ -132,10 +132,7 @@ public abstract class AbstractNpcInfo extends L2GameServerPacket {
 			writeD(_npc.getObjectId());
 			writeD(_idTemplate + 1000000); // npctype id
 			writeD(_isAttackable ? 1 : 0);
-			writeD(_x);
-			writeD(_y);
-			writeD(_z);
-			writeD(_heading);
+			writeLocWithHeading(_pos, _heading);
 			writeD(0x00);
 			writeD(_mAtkSpd);
 			writeD(_pAtkSpd);
@@ -214,10 +211,7 @@ public abstract class AbstractNpcInfo extends L2GameServerPacket {
 			writeD(_trap.getObjectId());
 			writeD(_idTemplate + 1000000); // npctype id
 			writeD(_isAttackable ? 1 : 0);
-			writeD(_x);
-			writeD(_y);
-			writeD(_z);
-			writeD(_heading);
+			writeLocWithHeading(_pos, _heading);
 			writeD(0x00);
 			writeD(_mAtkSpd);
 			writeD(_pAtkSpd);
@@ -312,10 +306,7 @@ public abstract class AbstractNpcInfo extends L2GameServerPacket {
 			writeD(_summon.getObjectId());
 			writeD(_idTemplate + 1000000); // npctype id
 			writeD(_isAttackable ? 1 : 0);
-			writeD(_x);
-			writeD(_y);
-			writeD(_z);
-			writeD(_heading);
+			writeLocWithHeading(_pos, _heading);
 			writeD(0x00);
 			writeD(_mAtkSpd);
 			writeD(_pAtkSpd);

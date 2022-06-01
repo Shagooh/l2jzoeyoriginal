@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -46,7 +46,7 @@ public final class FinishRotating extends L2GameClientPacket {
 		
 		StopRotation sr;
 		if (activeChar.isInAirShip() && activeChar.getAirShip().isCaptain(activeChar)) {
-			activeChar.getAirShip().setHeading(_degree);
+			activeChar.getAirShip().setLocation(activeChar.getAirShip().getLocation(), _degree);
 			sr = new StopRotation(activeChar.getAirShip().getObjectId(), _degree, 0);
 			activeChar.getAirShip().broadcastPacket(sr);
 		} else {

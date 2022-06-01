@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -201,7 +201,7 @@ public final class CharacterCreate extends L2GameClientPacket {
 		
 		final L2PcTemplate template = newChar.getTemplate();
 		Location createLoc = PlayerCreationPointData.getInstance().getCreationPoint(template.getClassId());
-		newChar.setXYZInvisible(createLoc.getX(), createLoc.getY(), createLoc.getZ());
+		newChar.setLocationInvisible(createLoc);
 		newChar.setTitle("");
 		
 		if (vitality().enabled()) {

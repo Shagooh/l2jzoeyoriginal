@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -24,39 +24,7 @@ import com.l2jserver.gameserver.model.Location;
  * Object world location storage and update interface.
  * @author Zoey76
  */
-public interface IPositionable extends ILocational {
-	/**
-	 * Sets the X coordinate of this object.
-	 * @param x the new X coordinate
-	 */
-	void setX(int x);
-	
-	/**
-	 * Sets the Y coordinate of this object.
-	 * @param y the new Y coordinate
-	 */
-	void setY(int y);
-	
-	/**
-	 * Sets the Z coordinate of this object.
-	 * @param z the new Z coordinate
-	 */
-	void setZ(int z);
-	
-	/**
-	 * Sets all three coordinates of this object.
-	 * @param x the new X coordinate
-	 * @param y the new Y coordinate
-	 * @param z the new Z coordinate
-	 */
-	void setXYZ(int x, int y, int z);
-	
-	/**
-	 * Sets all three coordinates of this object.
-	 * @param loc the object whose coordinates to use
-	 */
-	void setXYZ(ILocational loc);
-	
+public interface IPositionable extends ILocational, IMutablePosition {
 	/**
 	 * Sets the heading of this object.
 	 * @param heading the new heading
@@ -64,14 +32,81 @@ public interface IPositionable extends ILocational {
 	void setHeading(int heading);
 	
 	/**
-	 * Changes the instance zone ID of this object.
-	 * @param instanceId the ID of the instance zone to put this object in (0 - not in any instance)
+	 * Changes the location of this object.
+	 * @param x new x coordinate
+	 * @param y new y coordinate
+	 * @param z new z coordinate
 	 */
-	void setInstanceId(int instanceId);
+	default void setLocation(int x, int y, int z) {
+		setXYZ(x, y, z);
+	}
 	
 	/**
 	 * Changes the location of this object.
-	 * @param loc the new location
+	 * @param 
+	 */
+	void setLocation(int x, int y, int z, int heading, int instanceId);
+
+	/**
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param heading
+	 */
+	default void setLocation(int x, int y, int z, int heading) {
+		Location loc = getLocation();
+		setLocation(x, y, z, heading, loc.getInstanceId());
+	}
+	
+	/**
+	 * Changes the location of this object.
+	 * @param loc location from which to update the location
 	 */
 	void setLocation(Location loc);
+	
+	/**
+	 * Changes the location of this object.
+	 * @param loc location from which the x, y, z and instanceId are taken
+	 * @param heading the new heading
+	 */
+	default void setLocation(Location loc, int heading) {
+		setLocation(loc.getX(), loc.getY(), loc.getZ(), heading, loc.getInstanceId());
+	}
+
+	/**
+	 * Changes the location of this object.
+	 * @param loc location from which the x, y and z coordinates are taken
+	 * @param heading the new heading
+	 * @param instanceId the new instanceId
+	 */
+	default void setLocation(Location loc, int heading, int instanceId) {
+		setLocation(loc.getX(), loc.getY(), loc.getZ(), heading, instanceId);
+	}
+	
+	/**
+	 * Changes the location of this object.
+	 * @param loc locational from which to update the location
+	 */
+	default void setLocation(ILocational loc) {
+		setLocation(loc.getLocation());
+	}
+	
+	/**
+	 * Changes the location of this object.
+	 * @param loc locational from which the x, y, z and instanceId are taken
+	 * @param heading the new heading
+	 */
+	default void setLocation(ILocational loc, int heading) {
+		setLocation(loc.getLocation(), heading);
+	}
+	
+	/**
+	 * Changes the location of this object.
+	 * @param loc locational from which the x, y and z coordinates are taken
+	 * @param heading the new heading
+	 * @param instanceId the new instanceId
+	 */
+	default void setLocation(ILocational loc, int heading, int instanceId) {
+		setLocation(loc.getLocation(), heading, instanceId);
+	}
 }

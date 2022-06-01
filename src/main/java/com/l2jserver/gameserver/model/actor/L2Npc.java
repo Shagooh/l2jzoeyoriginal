@@ -1488,7 +1488,7 @@ public class L2Npc extends L2Character {
 	 * @param radiusMax maximal range from NPC (not further than)
 	 * @return Location in given range from this NPC
 	 */
-	public Location getPointInRange(int radiusMin, int radiusMax) {
+	public Location getPointInRange(int radiusMin, int radiusMax, int heading) {
 		if ((radiusMax == 0) || (radiusMax < radiusMin)) {
 			return new Location(getX(), getY(), getZ());
 		}
@@ -1496,7 +1496,11 @@ public class L2Npc extends L2Character {
 		final int radius = Rnd.get(radiusMin, radiusMax);
 		final double angle = Rnd.nextDouble() * 2 * Math.PI;
 		
-		return new Location((int) (getX() + (radius * Math.cos(angle))), (int) (getY() + (radius * Math.sin(angle))), getZ());
+		return new Location((int) (getX() + (radius * Math.cos(angle))), (int) (getY() + (radius * Math.sin(angle))), getZ(), heading);
+	}
+	
+	public Location getPointInRange(int radiusMin, int radiusMax) {
+		return getPointInRange(radiusMin, radiusMax, 0);
 	}
 	
 	/**

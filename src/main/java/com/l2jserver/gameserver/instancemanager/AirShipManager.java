@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -99,8 +99,9 @@ public class AirShipManager {
 	public L2AirShipInstance getNewAirShip(int x, int y, int z, int heading) {
 		final L2AirShipInstance airShip = new L2AirShipInstance(_airShipTemplate);
 		
-		airShip.setHeading(heading);
-		airShip.setXYZInvisible(x, y, z);
+		airShip.setLocation(x, y, z, heading);
+		airShip.setIsVisible(false);
+		//airShip.setXYZInvisible(x, y, z);
 		airShip.spawnMe();
 		airShip.getStat().setMoveSpeed(280);
 		airShip.getStat().setRotationSpeed(2000);
@@ -127,8 +128,8 @@ public class AirShipManager {
 			airShip.getStat().setRotationSpeed(2000);
 		}
 		
-		airShip.setHeading(heading);
-		airShip.setXYZInvisible(x, y, z);
+		airShip.setLocation(x, y, z, heading);
+		airShip.setIsVisible(false);
 		airShip.spawnMe();
 		return airShip;
 	}
