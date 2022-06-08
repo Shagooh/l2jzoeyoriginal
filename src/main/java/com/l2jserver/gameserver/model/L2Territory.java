@@ -127,25 +127,26 @@ public class L2Territory {
 	}
 	
 	public Location getRandomPoint() {
-		return getRandomPoint(-1);
+		return getRandomPoint(Location.RANDOM_HEADING_INDICATOR);
 	}
 	
 	public Location getRandomPoint(int heading) {
-		return getRandomPoint(heading, Integer.MIN_VALUE);
+		return getRandomPoint(heading, Location.DEFAULT_INSTANCE_ID, false);
 	}
 	
 	public Location getRandomPoint(int heading, int instanceId) {
 		return getRandomPoint(heading, instanceId, false);
 	}
 	
+	public Location getRandomPoint(int heading, boolean geoCorrection) {
+		return getRandomPoint(heading, Location.DEFAULT_INSTANCE_ID, geoCorrection);
+	}
+	
 	public Location getRandomPoint(boolean geoCorrection) {
-		return getRandomPoint(-1, Integer.MIN_VALUE, geoCorrection);
+		return getRandomPoint(Location.RANDOM_HEADING_INDICATOR, Location.DEFAULT_INSTANCE_ID, geoCorrection);
 	}
 	
 	public Location getRandomPoint(int heading, int instanceId, boolean geoCorrection) {
-		int actualHeading = heading < 0 ? 0 : heading;
-		int actualInstanceId = instanceId == Integer.MIN_VALUE ? -1 : instanceId;
-
 		if (_procMax > 0) {
 			int pos = 0;
 			int rnd = Rnd.nextInt(_procMax);
@@ -153,7 +154,7 @@ public class L2Territory {
 				pos += p1._proc;
 				if (rnd <= pos) {
 					int z = Rnd.get(p1._zmin, p1._zmax);
-					return new Location(p1._x, p1._y, geoCorrection ? GeoData.getInstance().getSpawnHeight(p1._x, p1._y, z) : z, actualHeading, actualInstanceId);
+					return new Location(p1._x, p1._y, geoCorrection ? GeoData.getInstance().getSpawnHeight(p1._x, p1._y, z) : z, heading, instanceId);
 				}
 			}
 			
@@ -172,7 +173,7 @@ public class L2Territory {
 					}
 				}
 				int z = Rnd.get(zmin, _zMax);
-				return new Location(x, y, geoCorrection ? GeoData.getInstance().getSpawnHeight(x, y, z) : z, actualHeading, actualInstanceId);
+				return new Location(x, y, geoCorrection ? GeoData.getInstance().getSpawnHeight(x, y, z) : z, heading, instanceId);
 			}
 		}
 		_log.warning("Can't make point for territory " + _terr);

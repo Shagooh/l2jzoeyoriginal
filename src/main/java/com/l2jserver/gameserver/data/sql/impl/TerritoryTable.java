@@ -54,6 +54,10 @@ public class TerritoryTable {
 		return getRandomPoint(terr, -1, Integer.MIN_VALUE, geoCorrection);
 	}
 	
+	public Location getRandomPoint(int terr, int heading, boolean geoCorrection) {
+		return getRandomPoint(terr, heading, Location.DEFAULT_INSTANCE_ID, geoCorrection);
+	}
+	
 	public Location getRandomPoint(int terr, int heading, int instanceId, boolean geoCorrection) {
 		return _territory.get(terr).getRandomPoint(heading, instanceId, geoCorrection);
 	}

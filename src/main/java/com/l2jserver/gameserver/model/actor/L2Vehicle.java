@@ -308,12 +308,7 @@ public abstract class L2Vehicle extends L2Character {
 		}
 		
 		decayMe();
-		setXYZ(loc.getX(), loc.getY(), loc.getZ());
-		
-		// temporary fix for heading on teleports
-		if (loc.getHeading() != 0) {
-			setHeading(loc.getHeading());
-		}
+		setLocation(loc, loc.getHeading(), getInstanceId());
 		
 		onTeleported();
 		revalidateZone(true);
@@ -323,8 +318,7 @@ public abstract class L2Vehicle extends L2Character {
 	public void stopMove(Location loc, boolean updateKnownObjects) {
 		_move = null;
 		if (loc != null) {
-			setXYZ(loc.getX(), loc.getY(), loc.getZ());
-			setHeading(loc.getHeading());
+			setLocation(loc, loc.getHeading(), getInstanceId());
 			revalidateZone(true);
 		}
 		

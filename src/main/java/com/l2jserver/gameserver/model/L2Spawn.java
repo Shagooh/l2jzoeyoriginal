@@ -405,8 +405,8 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 	 * @param val
 	 * @return
 	 */
-	public L2Npc spawnOne(boolean val) {
-		return doSpawn(val);
+	public L2Npc spawnOne(boolean isSummonSpawn) {
+		return doSpawn(isSummonSpawn);
 	}
 	
 	/**
@@ -535,14 +535,6 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 		// Set is not random walk default value
 		mob.setIsNoRndWalk(isNoRndWalk());
 		
-		// Set the heading of the L2NpcInstance (random heading if not defined)
-		int heading = 0;
-		if (getHeading() == -1) {
-			heading = Rnd.nextInt(61794);
-		} else {
-			heading = getHeading();
-		}
-		
 		if (mob instanceof L2Attackable) {
 			((L2Attackable) mob).setChampion(false);
 		}
@@ -568,7 +560,7 @@ public class L2Spawn implements IPositionable, IIdentifiable, INamable {
 		mob.setSpawn(this);
 		
 		// Spawn NPC
-		mob.spawnMe(newlocx, newlocy, newlocz, heading, instanceId);
+		mob.spawnMe(newlocx, newlocy, newlocz, getHeading(), instanceId);
 		
 		notifyNpcSpawned(mob);
 		

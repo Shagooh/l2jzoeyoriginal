@@ -80,15 +80,9 @@ public class TvTEventTeleporter implements Runnable {
 			_playerInstance.setDuelState(DuelState.INTERRUPTED);
 		}
 		
-		int TvTInstance = TvTEvent.getTvTEventInstance();
-		if (TvTInstance != 0) {
-			if (TvTEvent.isStarted() && !_adminRemove) {
-				//_playerInstance.setInstanceId(TvTInstance);
-			} else {
-				TvTInstance = 0;//_playerInstance.setInstanceId(0);
-			}
-		} else {
-			TvTInstance = 0;//_playerInstance.setInstanceId(0);
+		int TvTInstance = 0;
+		if (TvTEvent.isStarted() && !_adminRemove) {
+			TvTInstance = TvTEvent.getTvTEventInstance();
 		}
 		
 		_playerInstance.doRevive();

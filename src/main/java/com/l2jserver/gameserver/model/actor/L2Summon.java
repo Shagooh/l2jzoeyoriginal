@@ -104,7 +104,8 @@ public abstract class L2Summon extends L2Playable {
 		_owner = owner;
 		getAI();
 		
-		setLocationInvisible(owner.getX() + Rnd.get(-100, 100), owner.getY() + Rnd.get(-100, 100), owner.getZ(), owner.getHeading(), owner.getInstanceId());
+		var loc = owner.getLocation();
+		setLocationInvisible(loc.getX() + Rnd.get(-100, 100), loc.getY() + Rnd.get(-100, 100), loc.getZ(), loc.getHeading(), loc.getInstanceId());
 		
 		// Copy the skills from template.
 		for (Skill skill : template.getSkills().values()) {

@@ -19,6 +19,7 @@
 package com.l2jserver.gameserver.model;
 
 import com.l2jserver.commons.util.Rnd;
+import com.l2jserver.gameserver.model.entity.Instance;
 import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
 
@@ -28,38 +29,78 @@ import com.l2jserver.gameserver.model.interfaces.ILocational;
  * @author Zoey76
  */
 public class Location implements ILocational, IImmutablePosition {
+	public static int DEFAULT_HEADING = 0;
+	public static int DEFAULT_INSTANCE_ID = Instance.INSTANCEID_MAINWORLD;
+	public static int RANDOM_HEADING_INDICATOR = -1;
+
 	private final int _x, _y, _z;
-	private int _heading;
+	private final int _heading;
 	private int _instanceId;
 
+	/**
+	 * Constructs a new Location.
+	 * 
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param z z coordinate
+	 * @param heading heading
+	 * @param instanceId the instance
+	 */
 	public Location(int x, int y, int z, int heading, int instanceId) {
 		_x = x;
 		_y = y;
 		_z = z;
 		if (heading < 0) {
-			_heading = Rnd.nextInt(61794);
+			_heading = Rnd.nextInt(65535);
 		} else {
 			_heading = heading;
 		}
 		_instanceId = instanceId;
 	}	
 	
+	/**
+	 * Constructs a location object where heading defaults to {@link #DEFAULT_HEADING} and instanceId defaults to {@link #DEFAULT_INSTANCE_ID}
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param z z coordinate
+	 */
 	public Location(int x, int y, int z) {
-		this(x, y, z, 0, -1);
+		this(x, y, z, DEFAULT_HEADING, DEFAULT_INSTANCE_ID);
 	}
 	
+	/**
+	 * Constructs a location object where instanceId defaults to {@link #DEFAULT_INSTANCE_ID}
+	 * @param x x coordinates
+	 * @param y y coordinates
+	 * @param z z coordinates
+	 * @param heading the facing direction
+	 */
 	public Location(int x, int y, int z, int heading) {
-		this(x, y, z, heading, -1);
+		this(x, y, z, heading, DEFAULT_INSTANCE_ID);
 	}
 
+	/**
+	 * Constructs a location object by copying all components of loc to the new object.
+	 * @param loc the other location
+	 */
 	public Location(Location loc) {
 		this(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), loc.getInstanceId());
 	}
-	
+
+	/**
+	 * Constructs a location object by copying all components of loc to the new object but taking the heading parameter as the new heading.
+	 * @param loc the other location
+	 * @param heading the facing direction
+	 */
 	public Location(Location loc, int heading) {
 		this(loc.getX(), loc.getY(), loc.getZ(), heading, loc.getInstanceId());
 	}
 
+	/**
+	 * Constructs a location object by copying all components of loc to the new object but taking the heading and instanceId parameter as the new heading and instanceId.
+	 * @param loc the other location
+	 * @param heading the facing direction
+	 */
 	public Location(Location loc, int heading, int instanceId) {
 		this(loc.getX(), loc.getY(), loc.getZ(), heading, instanceId);
 	}
@@ -76,46 +117,26 @@ public class Location implements ILocational, IImmutablePosition {
 		this(loc.getLocation(), heading, instanceId);
 	}
 	
-	/**
-	 * Get the x coordinate.
-	 * @return the x coordinate
-	 */
 	@Override
 	public int getX() {
 		return _x;
 	}
 	
-	/**
-	 * Get the y coordinate.
-	 * @return the y coordinate
-	 */
 	@Override
 	public int getY() {
 		return _y;
 	}
 	
-	/**
-	 * Get the z coordinate.
-	 * @return the z coordinate
-	 */
 	@Override
 	public int getZ() {
 		return _z;
 	}
 	
-	/**
-	 * Get the heading.
-	 * @return the heading
-	 */
 	@Override
 	public int getHeading() {
 		return _heading;
 	}
 	
-	/**
-	 * Get the instance Id.
-	 * @return the instance Id
-	 */
 	@Override
 	public int getInstanceId() {
 		return _instanceId;

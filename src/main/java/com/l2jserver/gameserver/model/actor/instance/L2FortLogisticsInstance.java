@@ -119,8 +119,7 @@ public class L2FortLogisticsInstance extends L2MerchantInstance {
 						L2MonsterInstance box = new L2MonsterInstance(boxTemplate);
 						box.setCurrentHp(box.getMaxHp());
 						box.setCurrentMp(box.getMaxMp());
-						box.setHeading(0);
-						box.spawnMe(getX() - 23, getY() + 41, getZ());
+						box.spawnMe(getX() - 23, getY() + 41, getZ(), 0, getInstanceId());
 						
 						getFort().setSupplyLvL(0);
 						getFort().saveFortVariables();

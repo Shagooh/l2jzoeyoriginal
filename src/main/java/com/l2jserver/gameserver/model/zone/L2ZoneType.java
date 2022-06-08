@@ -1,5 +1,5 @@
 /*
- * Copyright © 2004-2021 L2J Server
+ * Copyright © 2004-2022 L2J Server
  * 
  * This file is part of L2J Server.
  * 
@@ -30,6 +30,7 @@ import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.entity.Instance;
 import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.ListenersContainer;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneEnter;
@@ -333,7 +334,7 @@ public abstract class L2ZoneType extends ListenersContainer {
 	public boolean isInsideZone(int x, int y, int z, int instanceId) {
 		// It will check if coords are within the zone if the given instanceId or
 		// the zone's _instanceId are in the multiverse or they match
-		if ((_instanceId == -1) || (instanceId == -1) || (_instanceId == instanceId)) {
+		if ((_instanceId == Instance.INSTANCEID_MULTIVERSE) || (instanceId == Instance.INSTANCEID_MULTIVERSE) || (_instanceId == instanceId)) {
 			return _zone.isInsideZone(x, y, z);
 		}
 		

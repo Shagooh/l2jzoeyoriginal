@@ -19,23 +19,21 @@
 package com.l2jserver.gameserver.network.serverpackets;
 
 import com.l2jserver.gameserver.model.L2Object;
-import com.l2jserver.gameserver.model.interfaces.IImmutablePosition;
+import com.l2jserver.gameserver.model.interfaces.ILocational;
 
 public class ValidateLocation extends L2GameServerPacket {
 	private final int _charObjId;
-	private final IImmutablePosition _pos;
-	private final int _heading;
+	private final ILocational _loc;
 	
 	public ValidateLocation(L2Object obj) {
 		_charObjId = obj.getObjectId();
-		_pos = obj.getImmutablePosition();
-		_heading = obj.getHeading();
+		_loc = obj.getLocation();
 	}
 	
 	@Override
 	protected final void writeImpl() {
 		writeC(0x79);
 		writeD(_charObjId);
-		writeLocWithHeading(_pos, _heading);
+		writeLocWithHeading(_loc);
 	}
 }

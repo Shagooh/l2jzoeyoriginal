@@ -148,7 +148,7 @@ public class L2Event {
 	public static void spawnEventNpc(L2PcInstance target) {
 		try {
 			final L2Spawn spawn = new L2Spawn(_npcId);
-			spawn.setLocation(target, target.getHeading(), -1);
+			spawn.setLocation(target, target.getHeading());
 			spawn.setAmount(1);
 			spawn.stopRespawn();
 			SpawnTable.getInstance().addNewSpawn(spawn, false);

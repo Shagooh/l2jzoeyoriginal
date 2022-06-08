@@ -1329,16 +1329,10 @@ public final class L2ItemInstance extends L2Object {
 				_z = dropDest.getZ();
 			}
 			
-/*			if (_dropper != null) {
-				setInstanceId(_dropper.getInstanceId()); // Inherit instance zone when dropped in visible world
-			} else {
-				setInstanceId(0); // No dropper? Make it a global item...
-			}*/
-			
 			synchronized (_itm) {
 				// Set the x,y,z position of the L2ItemInstance dropped and update its _worldregion
 				_itm.setIsVisible(true);
-				_itm.setLocation(_x, _y, _z, 0, _dropper != null ?_dropper.getInstanceId() : 0);
+				_itm.setLocation(_x, _y, _z, 0, _dropper != null ? _dropper.getInstanceId() : 0);
 				_itm.setWorldRegion(L2World.getInstance().getRegion(getLocation()));
 				
 				// Add the L2ItemInstance dropped to _visibleObjects of its L2WorldRegion

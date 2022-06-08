@@ -393,11 +393,7 @@ public class AutoSpawnHandler {
 				final int heading = locationList[locationIndex].getHeading();
 				
 				final L2Spawn newSpawn = new L2Spawn(spawnInst.getId());
-				if (heading != -1) {
-					newSpawn.setLocation(x, y, z, heading);
-				} else {
-					newSpawn.setXYZ(x, y, z);
-				}
+				newSpawn.setLocation(x, y, z, heading);
 				newSpawn.setAmount(spawnInst.getSpawnCount());
 				if (spawnInst._desDelay == 0) {
 					newSpawn.setRespawnDelay(spawnInst._resDelay);

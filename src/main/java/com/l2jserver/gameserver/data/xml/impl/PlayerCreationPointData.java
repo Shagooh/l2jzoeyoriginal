@@ -72,7 +72,7 @@ public class PlayerCreationPointData implements IXmlReader {
 						for (Node c = d.getFirstChild(); c != null; c = c.getNextSibling()) {
 							if ("spawn".equalsIgnoreCase(c.getNodeName())) {
 								attrs = c.getAttributes();
-								creationPoints.add(new Location(parseInteger(attrs, "x"), parseInteger(attrs, "y"), parseInteger(attrs, "z")));
+								creationPoints.add(new Location(parseInteger(attrs, "x"), parseInteger(attrs, "y"), parseInteger(attrs, "z"), 0, 0));
 							} else if ("classid".equalsIgnoreCase(c.getNodeName())) {
 								_creationPointData.put(ClassId.getClassId(Integer.parseInt(c.getTextContent())), creationPoints.toArray(new Location[0]));
 							}

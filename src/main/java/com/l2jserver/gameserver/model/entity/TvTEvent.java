@@ -539,7 +539,7 @@ public class TvTEvent {
 		if ((playerInstance != null) && (isStarting() || isStarted() || isParticipating())) {
 			if (removeParticipant(playerInstance.getObjectId())) {
 				final var loc = tvt().getParticipationNpcLoc();
-				playerInstance.setLocationInvisible((loc.getX() + Rnd.get(101)) - 50, (loc.getY() + Rnd.get(101)) - 50, loc.getZ(), loc.getHeading(), loc.getInstanceId());
+				playerInstance.setLocationInvisible((loc.getX() + Rnd.get(101)) - 50, (loc.getY() + Rnd.get(101)) - 50, loc.getZ(), loc.getHeading());
 			}
 		}
 	}

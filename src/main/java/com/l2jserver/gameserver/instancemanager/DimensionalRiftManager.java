@@ -40,6 +40,7 @@ import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.datatables.SpawnTable;
 import com.l2jserver.gameserver.model.DimensionalRiftRoom;
 import com.l2jserver.gameserver.model.L2Spawn;
+import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.DimensionalRift;
@@ -165,7 +166,7 @@ public final class DimensionalRiftManager {
 												if (_rooms.containsKey(type) && _rooms.get(type).containsKey(roomId)) {
 													final L2Spawn spawnDat = new L2Spawn(mobId);
 													spawnDat.setAmount(1);
-													spawnDat.setLocation(x, y, z, -1);
+													spawnDat.setLocation(x, y, z, Location.RANDOM_HEADING_INDICATOR);
 													spawnDat.setRespawnDelay(delay);
 													SpawnTable.getInstance().addNewSpawn(spawnDat, false);
 													_rooms.get(type).get(roomId).getSpawns().add(spawnDat);

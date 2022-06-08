@@ -72,6 +72,9 @@ import com.l2jserver.gameserver.util.Broadcast;
  */
 public final class Instance {
 	private static final Logger _log = Logger.getLogger(Instance.class.getName());
+
+	public static final int INSTANCEID_MULTIVERSE = -1;
+	public static final int INSTANCEID_MAINWORLD = 0;
 	
 	private final int _id;
 	private String _name;

@@ -171,7 +171,7 @@ public abstract class AbstractOlympiadGame {
 			player.setIsOlympiadStart(false);
 			player.setOlympiadSide(par.getSide());
 			player.setOlympiadBuffCount(olympiad().getMaxBuffs());
-			player.teleToLocation(loc, OlympiadGameManager.getInstance().getOlympiadTask(id).getZone().getInstanceId(), 0);
+			player.teleToLocation(loc, OlympiadGameManager.getInstance().getOlympiadTask(id).getZone().getInstanceId(), false);
 			player.sendPacket(new ExOlympiadMode(2));
 		} catch (Exception e) {
 			_log.log(Level.WARNING, e.getMessage(), e);

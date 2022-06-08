@@ -192,7 +192,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 	}
 	
 	public final void spawnMe(int x, int y, int z) {
-		spawnMe(x, y, z, 0, -1);
+		spawnMe(x, y, z, getHeading(), getInstanceId());
 	}
 	
 	public final void spawnMe(int x, int y, int z, int heading, int instanceId) {
@@ -515,7 +515,7 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 		if (isCharacter()) {
 			decayMe();
 		} else if (isPlayer()) {
-			((L2Character) this).teleToLocation(new Location(0, 0, 0), false);
+			((L2Character) this).teleToLocation(0, 0, 0, 0, 0, false);
 			((L2Character) this).sendMessage("Error with your coords, Please ask a GM for help!");
 		}
 	}
@@ -538,6 +538,11 @@ public abstract class L2Object extends ListenersContainer implements IIdentifiab
 		setLocation(x, y, z, heading, instanceId);
 		setIsVisible(false);
 	}
+	
+	public final void setLocationInvisible(int x, int y, int z, int heading) {
+		setLocationInvisible(x, y, z, heading, getInstanceId());
+	}
+	
 	
 	public final void setLocationInvisible(ILocational loc) {
 		setLocationInvisible(loc.getX(), loc.getY(), loc.getZ(), loc.getHeading(), loc.getInstanceId());

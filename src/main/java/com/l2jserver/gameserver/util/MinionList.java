@@ -308,21 +308,22 @@ public class MinionList {
 		final int offset = 200;
 		final int minRadius = (int) master.getCollisionRadius() + 30;
 		
+		var loc = master.getLocation();
 		int newX = Rnd.get(minRadius * 2, offset * 2); // x
 		int newY = Rnd.get(newX, offset * 2); // distance
 		newY = (int) Math.sqrt((newY * newY) - (newX * newX)); // y
 		if (newX > (offset + minRadius)) {
-			newX = (master.getX() + newX) - offset;
+			newX = (loc.getX() + newX) - offset;
 		} else {
-			newX = (master.getX() - newX) + minRadius;
+			newX = (loc.getX() - newX) + minRadius;
 		}
 		if (newY > (offset + minRadius)) {
-			newY = (master.getY() + newY) - offset;
+			newY = (loc.getY() + newY) - offset;
 		} else {
-			newY = (master.getY() - newY) + minRadius;
+			newY = (loc.getY() - newY) + minRadius;
 		}
 		
-		minion.spawnMe(newX, newY, master.getZ(), master.getHeading(), master.getInstanceId());
+		minion.spawnMe(newX, newY, loc.getZ(), loc.getHeading(), loc.getInstanceId());
 		
 		if (general().debug()) {
 			_log.info("Spawned minion template " + minion.getId() + " with objid: " + minion.getObjectId() + " to boss " + master.getObjectId() + " ,at: " + minion.getX() + " x, " + minion.getY() + " y, " + minion.getZ() + " z");

@@ -142,15 +142,14 @@ public class ValidatePosition extends L2GameClientPacket {
 				if (!activeChar.isMoving() || !activeChar.validateMovementHeading(_heading)) {
 					// character is not moving, take coordinates from client
 					if (diffSq < 2500) {
-						activeChar.setXYZ(realX, realY, _z);
+						activeChar.setLocation(realX, realY, _z, _heading);
 					} else {
-						activeChar.setXYZ(_x, _y, _z);
+						activeChar.setLocation(_x, _y, _z, _heading);
 					}
 				} else {
-					activeChar.setXYZ(realX, realY, _z);
+					activeChar.setLocation(realX, realY, _z, _heading);
 				}
 				
-				activeChar.setHeading(_heading);
 				return;
 			}
 			// Sync 2 (or other),

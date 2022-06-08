@@ -1496,7 +1496,8 @@ public class L2Npc extends L2Character {
 		final int radius = Rnd.get(radiusMin, radiusMax);
 		final double angle = Rnd.nextDouble() * 2 * Math.PI;
 		
-		return new Location((int) (getX() + (radius * Math.cos(angle))), (int) (getY() + (radius * Math.sin(angle))), getZ(), heading);
+		var loc = getLocation();
+		return new Location((int) (loc.getX() + (radius * Math.cos(angle))), (int) (loc.getY() + (radius * Math.sin(angle))), loc.getZ(), heading);
 	}
 	
 	public Location getPointInRange(int radiusMin, int radiusMax) {

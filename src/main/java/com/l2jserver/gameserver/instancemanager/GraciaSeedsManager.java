@@ -172,7 +172,7 @@ public final class GraciaSeedsManager {
 		try {
 			if (edricSpawn == null || edricSpawn.isDecayed()) {
 				final L2Spawn spawn = new L2Spawn(EDRIC);
-				spawn.setLocation(EDRIC_SPAWN_LOCATION, EDRIC_SPAWN_LOCATION.getHeading(), 0);
+				spawn.setLocation(EDRIC_SPAWN_LOCATION);
 				spawn.stopRespawn();
 				final L2Npc npc = spawn.spawnOne(false);
 				edricSpawn = npc;

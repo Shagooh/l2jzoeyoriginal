@@ -149,7 +149,7 @@ public class PlayerDAOMySQLImpl implements PlayerDAO {
 					player.getHuntingSystem().setNevitBlessingTime(rs.getInt("nevit_blessing_time"));
 					
 					// Set the x,y,z position of the L2PcInstance and make it invisible
-					player.setLocationInvisible(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("heading"), 0);
+					player.setLocationInvisible(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("heading"));
 					
 					// Set Teleport Bookmark Slot
 					player.setBookMarkSlot(rs.getInt("BookmarkSlot"));

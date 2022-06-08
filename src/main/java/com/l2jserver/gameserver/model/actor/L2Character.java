@@ -629,8 +629,6 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * @param randomOffset
 	 */
 	public void teleToLocation(int x, int y, int z, int heading, int instanceId, int randomOffset) {
-		//setInstanceId(instanceId);
-		
 		if (_isPendingRevive) {
 			doRevive();
 		}
@@ -651,6 +649,11 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		
 		z += 5;
 		
+		// temporary fix for heading on teleports
+		if (heading == 0) {
+			heading = getHeading();
+		}
+		
 		// Send a Server->Client packet TeleportToLocationt to the L2Character AND to all L2PcInstance in the _KnownPlayers of the L2Character
 		broadcastPacket(new TeleportToLocation(this, x, y, z, heading));
 		
@@ -658,12 +661,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		decayMe();
 		
 		// Set the x,y,z position of the L2Object and if necessary modify its _worldRegion
-		// temporary fix for heading on teleports
-		if (heading != 0) {
-			setLocation(x, y, z, heading, instanceId);
-		} else {
-			setLocation(x, y, z, getHeading(), instanceId);
-		}
+		setLocation(x, y, z, heading, instanceId);
 		
 		// allow recall of the detached characters
 		if (!isPlayer() || ((getActingPlayer().getClient() != null) && getActingPlayer().getClient().isDetached())) {
@@ -3470,8 +3468,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 		// Set the current position (x,y,z), its current L2WorldRegion if necessary and its heading
 		// All data are contained in a Location object
 		if (loc != null) {
-			setXYZ(loc.getX(), loc.getY(), loc.getZ());
-			setHeading(loc.getHeading());
+			setLocation(loc, loc.getHeading(), getInstanceId());
 			revalidateZone(true);
 		}
 		broadcastPacket(new StopMove(this));

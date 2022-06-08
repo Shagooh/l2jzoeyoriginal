@@ -99,9 +99,7 @@ public class AirShipManager {
 	public L2AirShipInstance getNewAirShip(int x, int y, int z, int heading) {
 		final L2AirShipInstance airShip = new L2AirShipInstance(_airShipTemplate);
 		
-		airShip.setLocation(x, y, z, heading);
-		airShip.setIsVisible(false);
-		//airShip.setXYZInvisible(x, y, z);
+		airShip.setLocationInvisible(x, y, z, heading);
 		airShip.spawnMe();
 		airShip.getStat().setMoveSpeed(280);
 		airShip.getStat().setRotationSpeed(2000);
@@ -128,8 +126,7 @@ public class AirShipManager {
 			airShip.getStat().setRotationSpeed(2000);
 		}
 		
-		airShip.setLocation(x, y, z, heading);
-		airShip.setIsVisible(false);
+		airShip.setLocationInvisible(x, y, z, heading);
 		airShip.spawnMe();
 		return airShip;
 	}
